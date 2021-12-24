@@ -48,6 +48,18 @@ express()
       res.send(JSON.parse(data));
     });
   })
+  .get('/users/:id', (req, res) => {
+    readFile(data => {
+
+           
+      const userId = req.params["id"];
+      /* data[userId] = res.body; */
+
+      console.log(data[userId])
+      res.send(data[userId])
+    },
+    true);
+  })
   .post('/users', (req, res) => {
 
     readFile(data => {
