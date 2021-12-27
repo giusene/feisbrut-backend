@@ -66,7 +66,7 @@ express()
       const newUserId = Date.now().toString();
 
             
-      console.log(JSON.stringify(data[newUserId.toString()]))
+      
       data[newUserId.toString()] = req.body;
       
       writeFile(JSON.stringify(data, null, 2), () => {
@@ -81,9 +81,26 @@ express()
 
     readFile(data => {
 
-           
+      
       const userId = req.params["id"];
       data[userId] = req.body;
+
+      writeFile(JSON.stringify(data, null, 2), () => {
+        res.status(200).send(`users id:${userId} updated`);
+      });
+    },
+    true);
+  })
+  .patch('/users/:id', (req, res) => {
+
+    readFile(data => {
+
+      
+      const userId = req.params["id"];
+      
+      let newBody = req.body
+      let newObj = {...data[userId],...newBody}      
+      data[userId] = newObj
 
       writeFile(JSON.stringify(data, null, 2), () => {
         res.status(200).send(`users id:${userId} updated`);
