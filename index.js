@@ -25,7 +25,7 @@ const dataPath = './data/users.json'
             if (err) {
                 throw err;
             }
-
+            
             callback();
         });
     };
@@ -44,8 +44,9 @@ express()
       if (err) {
         throw err;
       }
-
       res.send(JSON.parse(data));
+      
+      
     });
   })
   .get('/users/:id', (req, res) => {
@@ -53,9 +54,7 @@ express()
 
            
       const userId = req.params["id"];
-      /* data[userId] = res.body; */
-
-      console.log(data[userId])
+      /* data[userId] = res.body; */      
       res.send(data[userId])
     },
     true);
@@ -67,10 +66,13 @@ express()
       const newUserId = Date.now().toString();
 
             
+      console.log(JSON.stringify(data[newUserId.toString()]))
       data[newUserId.toString()] = req.body;
-
+      
       writeFile(JSON.stringify(data, null, 2), () => {
-        res.status(200).send('new user added');
+       
+        
+        res.status(200).send(newUserId);
       });
     },
     true);
