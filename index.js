@@ -7,10 +7,11 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const cors = require('cors')
 const routes = require('./routes/routes.js')(express(), fs);
-const dataPath = './data/users.json'
+const usersPath = './data/users.json';
+const postsPath = './data/posts.json';
 
 
- const readFile = (callback, returnJson = false, filePath = dataPath, encoding = 'utf8') => {
+ const readFile = (callback, returnJson = false, filePath, encoding = 'utf8') => {
         fs.readFile(filePath, encoding, (err, data) => {
             if (err) {
                 throw err;
@@ -19,7 +20,7 @@ const dataPath = './data/users.json'
             callback(returnJson ? JSON.parse(data) : data);
         });
     };
-    const writeFile = (fileData, callback, filePath = dataPath, encoding = 'utf8') => {
+    const writeFile = (fileData, callback, filePath, encoding = 'utf8') => {
 
         fs.writeFile(filePath, fileData, encoding, (err) => {
             if (err) {
@@ -40,7 +41,7 @@ express()
   .set('view engine', 'ejs')
   .get('/', (req, res) => res.render('pages/index'))
   .get('/users', (req, res) => {
-    fs.readFile(dataPath, 'utf8', (err, data) => {
+    fs.readFile(usersPath, 'utf8', (err, data) => {
       if (err) {
         throw err;
       }
@@ -57,7 +58,7 @@ express()
       /* data[userId] = res.body; */      
       res.send(data[userId])
     },
-    true);
+    true,usersPath);
   })
   .post('/users', (req, res) => {
 
@@ -73,9 +74,9 @@ express()
        
         
         res.status(200).send(newUserId);
-      });
+      },usersPath);
     },
-    true);
+    true,usersPath);
   })
   .put('/users/:id', (req, res) => {
 
@@ -87,9 +88,9 @@ express()
 
       writeFile(JSON.stringify(data, null, 2), () => {
         res.status(200).send(`users id:${userId} updated`);
-      });
+      },usersPath);
     },
-    true);
+    true,usersPath);
   })
   .patch('/users/:id', (req, res) => {
 
@@ -104,9 +105,9 @@ express()
 
       writeFile(JSON.stringify(data, null, 2), () => {
         res.status(200).send(`users id:${userId} updated`);
-      });
+      },usersPath);
     },
-    true);
+    true,usersPath);
   })
   .delete('/users/:id', (req, res) => {
 
@@ -118,9 +119,94 @@ express()
 
       writeFile(JSON.stringify(data, null, 2), () => {
        res.status(200).send(`users id:${userId} removed`);
-      });
+      },usersPath);
     },
-    true);
+    true,usersPath);
+  })
+
+
+  .get('/posts', (req, res) => {
+    fs.readFile(postsPath, 'utf8', (err, data) => {
+      if (err) {
+        throw err;
+      }
+      res.send(JSON.parse(data));
+      
+      
+    });
+  })
+  .get('/posts/:id', (req, res) => {
+    readFile(data => {
+
+           
+      const postId = req.params["id"];
+      /* data[userId] = res.body; */      
+      res.send(data[postId])
+    },
+    true,postsPath);
+  })
+  .post('/posts', (req, res) => {
+
+    readFile(data => {
+       
+      const newPostId = Date.now().toString();
+
+            
+      
+      data[newPostId.toString()] = req.body;
+      
+      writeFile(JSON.stringify(data, null, 2), () => {
+       
+        
+        res.status(200).send(newPostId);
+      },postsPath);
+    },
+    true,postsPath);
+  })
+  .put('/posts/:id', (req, res) => {
+
+    readFile(data => {
+
+      
+      const postId = req.params["id"];
+      data[postId] = req.body;
+
+      writeFile(JSON.stringify(data, null, 2), () => {
+        res.status(200).send(`post id:${postId} updated`);
+      },postsPath);
+    },
+    true,postsPath);
+  })
+  .patch('/posts/:id', (req, res) => {
+
+    readFile(data => {
+
+      
+      const postId = req.params["id"];
+      
+      let newBody = req.body
+      let newObj = {...data[postId],...newBody}      
+      data[postId] = newObj
+
+      writeFile(JSON.stringify(data, null, 2), () => {
+        res.status(200).send(`users id:${postId} updated`);
+      },postsPath);
+    },
+    true,postsPath);
+  })
+  .delete('/posts/:id', (req, res) => {
+
+    readFile(data => {
+
+            
+      const postId = req.params["id"];
+      delete data[postId];
+
+      writeFile(JSON.stringify(data, null, 2), () => {
+       res.status(200).send(`users id:${postId} removed`);
+      },postsPath);
+    },
+    true,postsPath);
   })
   .listen(PORT, () => console.log(`Listening on ${ PORT }`))
 
