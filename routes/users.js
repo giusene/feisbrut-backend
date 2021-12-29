@@ -1,94 +1,105 @@
-const cors = require('cors')
-const userRoutes = (app, fs) => {
+const express = require('express');
+const fs = require('fs')
+const router = express.Router();
 
-    // variables
-    const dataPath = './data/users.json';
 
-    // helper methods
-    const readFile = (callback, returnJson = false, filePath = dataPath, encoding = 'utf8') => {
-        fs.readFile(filePath, encoding, (err, data) => {
-            if (err) {
-                throw err;
-            }
+const readWrite = require('../libs/read&write');
+const readFile = readWrite.readFile;
+const writeFile = readWrite.writeFile;
 
-            callback(returnJson ? JSON.parse(data) : data);
-        });
-    };
 
-    const writeFile = (fileData, callback, filePath = dataPath, encoding = 'utf8') => {
 
-        fs.writeFile(filePath, fileData, encoding, (err) => {
-            if (err) {
-                throw err;
-            }
+const usersPath = './data/users.json';
 
-            callback();
-        });
-    };
+const usersJSON = fs.readFileSync('./data/users.json', 'utf-8')
+    const users = JSON.parse(usersJSON)
 
-    // READ
-    app.use(cors())
-    app.get('/users', (req, res) => {
-        fs.readFile(dataPath, 'utf8', (err, data) => {
-            if (err) {
-                throw err;
-            }
-
-            res.send(JSON.parse(data));
-        });
+router.get('/users', (req, res) => {
+    fs.readFile(usersPath, 'utf8', (err, data) => {
+      if (err) {
+        throw err;
+      }
+      res.send(JSON.parse(data));
+      
+      
+      
     });
-
-    // CREATE
-    app.post('/users', (req, res) => {
-
-        readFile(data => {
-            // Note: this isn't ideal for production use. 
-            // ideally, use something like a UUID or other GUID for a unique ID value
-            const newUserId = Date.now().toString();
-
-            // add the new user
-            data[newUserId.toString()] = req.body;
-
-            writeFile(JSON.stringify(data, null, 2), () => {
-                res.status(200).send('new user added');
-            });
-        },
-            true);
-    });
+  })
+  router.get('/users/:id', (req, res) => {
+    
+    readFile(data=>{
+        let result;
+        const userId = req.params["id"];
+        data.map((user)=>{if(parseInt(user.id)==userId){result=user}})
+        res.send(result);
 
 
-    // UPDATE
-    app.put('/users/:id', (req, res) => {
+      },
+      true,usersPath)
+      
+      
+      
+      
+  })
+  router.post('/users', (req, res) => {
 
-        readFile(data => {
+    readFile(data => {
+       
+      const newUserId = Date.now().toString();
+      newReq = req.body
+      let newObject = {id:newUserId,...newReq}
+            
+      
+      data = [...data,newObject];
+      
+      writeFile(JSON.stringify(data, null, 2), () => {
+       
+        
+        res.status(200).send(newUserId);
+      },usersPath);
+    },
+    true,usersPath);
+  })
+  
+  router.patch('/users/:id', (req, res) => {
 
-            // add the new user
-            const userId = req.params["id"];
-            data[userId] = req.body;
+    readFile(data => {
+      let result;
+      const userId = req.params["id"];
+      users.map((user)=>{if(user.id===userId){result=user}})   
+      
+      
+      let newReq = req.body
+      let newObj = {...result,...newReq}   
+         
+      data.map((user)=> {if(user.id===userId){data[data.indexOf(user)]=newObj}})
+     
 
-            writeFile(JSON.stringify(data, null, 2), () => {
-                res.status(200).send(`users id:${userId} updated`);
-            });
-        },
-            true);
-    });
+      writeFile(JSON.stringify(data, null, 2), () => {
+        res.status(200).send(`user id:${userId} updated`);
+      },usersPath);
+    },
+    true,usersPath);
+  })
+  router.delete('/users/:id', (req, res) => {
+
+    readFile(data => {
+
+      const userId = req.params["id"];
+      
+      data.map((user)=> {if(user.id===userId){  data.splice([data.indexOf(user)])}})
+            
+
+      
+
+      writeFile(JSON.stringify(data, null, 2), () => {
+       res.status(200).send(`user id:${userId} removed`);
+      },usersPath);
+    },
+    true,usersPath);
+  })
 
 
-    // DELETE
-    app.delete('/users/:id', (req, res) => {
+  module.exports = router;
 
-        readFile(data => {
 
-            // delete the user
-            const userId = req.params["id"];
-            delete data[userId];
-
-            writeFile(JSON.stringify(data, null, 2), () => {
-                res.status(200).send(`users id:${userId} removed`);
-            });
-        },
-            true);
-    });
-};
-
-module.exports = userRoutes;
