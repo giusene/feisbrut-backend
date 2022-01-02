@@ -2,16 +2,34 @@ const express = require("express");
 const { MongoClient } = require("mongodb");
 const fs = require("fs");
 const router = express.Router();
+const config = require('../config')
+
 
 const { readFile, writeFile } = require("../libs/read&write");
 const dbURI =
-  "mongodb+srv://Canstopme0:Me2hMydCDfYD2c7@fesibrut-api.dkfxl.mongodb.net/users?retryWrites=true&w=majority";
+  `mongodb+srv://Canstopme0:${config.uriKey}@fesibrut-api.dkfxl.mongodb.net/users?retryWrites=true&w=majority`;
 const mongoClient = new MongoClient(dbURI);
 const usersPath = "./data/users.json";
 
 const usersJSON = fs.readFileSync("./data/users.json", "utf-8");
 const users = JSON.parse(usersJSON);
 let feisbrutDB, usersCollection;
+
+
+router.post("/login", async (req,res)=>{
+  
+  let newReq= req.body
+  let data = [];
+  const cursor = usersCollection.find({});
+  await cursor.forEach((user) => data.push(user))
+    let result =  data.filter(user =>  user.email === newReq.email && user.password === newReq.password && user.confirmed);
+    console.log(result)
+    if (result.length > 0 ){
+      res.send(result)
+    } else{res.send("Utente non trovato")}
+    
+    
+})
 
 router.get("/users", async (req, res) => {
   /* fs.readFile(usersPath, "utf8", (err, data) => {

@@ -87,3 +87,6 @@ typings/
 
 # FuseBox cache
 .fusebox/
+
+# MYPASSWORD
+config.js
