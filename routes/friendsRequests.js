@@ -9,23 +9,11 @@ const mongoClient = new MongoClient(dbURI);
 
 let feisbrutDB, usersCollection;
 
-router.post("/login", async (req, res) => {
+router.post("/sendfriendrequest", async (req, res) => {
   let newReq = req.body;
-  let data = [];
-  const cursor = usersCollection.find({});
-  await cursor.forEach((user) => data.push(user));
-  let result = data.filter(
-    (user) =>
-      user.email === newReq.email &&
-      user.password === newReq.password &&
-      user.confirmed
-  );
-  console.log(result);
-  if (result.length > 0) {
-    res.send(result);
-  } else {
-    res.send("Utente non trovato");
-  }
+  console.log(newReq.myId)
+  console.log(newReq.friendId)
+  res.send(newReq)
 });
 
 router.get("/users", async (req, res) => {
@@ -91,41 +79,9 @@ router.delete("/users/:id", async (req, res) => {
   res.status(200).send(`user id:${userId} removed`);
 });
 
-router.post("/sendfriendrequest", async (req, res) => {
-  let newReq = req.body;
-  
-  
-  const myId = newReq.myId
-  const friendId = newReq.friendId
-  let me = await usersCollection.findOne({id:myId})
-  let friend = await usersCollection.findOne({id:friendId})
-  const updateMe = { $set: {friendreq:[...me.friendreq,friendId]}};
-  const updateFriend = { $set: {friendrec:[...friend.friendrec,myId]}};
-
-  if(me.friendreq.includes(friendId) || me.friendrec.includes(friendId)){
-    console.log("richiesta Già inviata!")
-
-    res.send("Richiesta Già Inviata!")
-  }
-  else if (me.friends.includes(friendId)){
-    res.send("Gli Utenti sono Già Amici!")
-  }
-  else{
-    const filterMe = { id: myId };
-    const risMe = await usersCollection.updateOne(filterMe,updateMe);
-    const filterFriend = {id: friendId};
-    const risFriend = await usersCollection.updateOne(filterFriend,updateFriend);
-    res.send("richiesta di amicizia inviata")
-  }
-
-  
-
-
-});
-
 async function run() {
   await mongoClient.connect();
-  console.log("siamo connessi con atlas Users!");
+  console.log("siamo connessi con atlas Users(FriendRequest)!");
 
   feisbrutDB = mongoClient.db("feisbrut");
   usersCollection = feisbrutDB.collection("users");
