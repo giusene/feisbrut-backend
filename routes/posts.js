@@ -20,7 +20,7 @@ router.post("/getmypost", (req,res)=>{
   let data = [];
   
     const cursor = postsCollection.find({});
-    await cursor.forEach((post) => {
+    cursor.forEach((post) => {
       data.push(post);
     });
     res.send(data);
