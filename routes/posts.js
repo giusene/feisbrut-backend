@@ -1,116 +1,72 @@
 const express = require("express");
+const { MongoClient } = require("mongodb");
 const fs = require("fs");
 const router = express.Router();
+const config = require("../config");
 
-const {readFile,writeFile} = require("../libs/read&write");
+const dbURI = `mongodb+srv://Canstopme0:${config.uriKey}@fesibrut-api.dkfxl.mongodb.net/posts?retryWrites=true&w=majority`;
+const mongoClient = new MongoClient(dbURI);
 
+let feisbrutDB, postsCollection;
 
-const postsPath = "./data/posts.json";
-
-const postsJSON = fs.readFileSync("./data/posts.json", "utf-8");
-const posts = JSON.parse(postsJSON);
-
-router.get("/posts", (req, res) => {
-  fs.readFile(postsPath, "utf8", (err, data) => {
-    if (err) {
-      throw err;
-    }
-    res.send(JSON.parse(data));
-    console.log("ciao");
+router.get("/posts", async (req, res) => {
+  const cursor = postsCollection.find({});
+  await cursor.forEach((post) => {
+    data.push(post);
   });
+  res.send(data);
 });
-router.get("/posts/:id", (req, res) => {
-  readFile(
-    (data) => {
-      let result;
-      const postId = req.params["id"];
-      data.map((post) => {
-        if (parseInt(post.id) == postId) {
-          result = post;
-        }
-      });
-      res.send(result);
-    },
-    true,
-    postsPath
-  );
+router.post("/getmypost", (req,res)=>{
+  let data = [];
+  
+    const cursor = postsCollection.find({});
+    await cursor.forEach((post) => {
+      data.push(post);
+    });
+    res.send(data);
+  
+
+})
+
+router.get("/posts/:id", async (req, res) => {
+  const postId = req.params["id"];
+  let post = await postsCollection.findOne({ id: postId });
+
+  res.send(post);
 });
-router.post("/posts", (req, res) => {
-  readFile(
-    (data) => {
-      const newPostId = Date.now().toString();
-      newReq = req.body;
-      let newObject = { id: newPostId, ...newReq };
+router.post("/posts", async (req, res) => {
+  const newPostId = Date.now().toString();
+  newReq = req.body;
+  let newObject = { id: newPostId, ...newReq };
+  const ris = await postsCollection.insertOne(newObject);
 
-      data = [...data, newObject];
-
-      writeFile(
-        JSON.stringify(data, null, 2),
-        () => {
-          res.status(200).send(newPostId);
-        },
-        postsPath
-      );
-    },
-    true,
-    postsPath
-  );
+  if (ris.acknowledged) {
+    res.status(200).send(newPostId);
+  }
 });
 
-router.patch("/posts/:id", (req, res) => {
-  readFile(
-    (data) => {
-      let result;
-      const postId = req.params["id"];
-      posts.map((post) => {
-        if (post.id === postId) {
-          result = post;
-        }
-      });
+router.patch("/posts/:id", async (req, res) => {
+  const postId = req.params["id"];
+  const update = { $set: req.body };
+  const filter = { id: postId };
+  const ris = await postsCollection.updateOne(filter, update);
 
-      let newReq = req.body;
-      let newObj = { ...result, ...newReq };
-
-      data.map((post) => {
-        if (post.id === postId) {
-          data[data.indexOf(post)] = newObj;
-        }
-      });
-
-      writeFile(
-        JSON.stringify(data, null, 2),
-        () => {
-          res.status(200).send(`post id:${postId} updated`);
-        },
-        postsPath
-      );
-    },
-    true,
-    postsPath
-  );
+  res.send(`user id:${postId} updated`);
 });
-router.delete("/posts/:id", (req, res) => {
-  readFile(
-    (data) => {
-      const postId = req.params["id"];
-
-      data.map((post) => {
-        if (post.id === postId) {
-          data.splice([data.indexOf(post)]);
-        }
-      });
-
-      writeFile(
-        JSON.stringify(data, null, 2),
-        () => {
-          res.status(200).send(`post id:${postId} removed`);
-        },
-        postsPath
-      );
-    },
-    true,
-    postsPath
-  );
+router.delete("/posts/:id", async (req, res) => {
+  const postId = req.params["id"];
+  const ris = await postsCollection.deleteOne({ id: postId });
+  res.status(200).send(`user id:${postId} removed`);
 });
+
+async function run() {
+  await mongoClient.connect();
+  console.log("siamo connessi con atlas Post!");
+
+  feisbrutDB = mongoClient.db("feisbrut");
+  postsCollection = feisbrutDB.collection("posts");
+}
+
+run().catch((err) => console.log("Errore" + err));
 
 module.exports = router;
