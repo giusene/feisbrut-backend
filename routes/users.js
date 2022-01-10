@@ -93,34 +93,75 @@ router.delete("/users/:id", async (req, res) => {
 
 router.post("/sendfriendrequest", async (req, res) => {
   let newReq = req.body;
-  
-  
-  const myId = newReq.myId
-  const friendId = newReq.friendId
-  let me = await usersCollection.findOne({id:myId})
-  let friend = await usersCollection.findOne({id:friendId})
-  const updateMe = { $set: {friendreq:[...me.friendreq,friendId]}};
-  const updateFriend = { $set: {friendrec:[...friend.friendrec,myId]}};
 
-  if(me.friendreq.includes(friendId) || me.friendrec.includes(friendId)){
-    console.log("richiesta Già inviata!")
+  const myId = newReq.myId;
+  const friendId = newReq.friendId;
+  let me = await usersCollection.findOne({ id: myId });
+  let friend = await usersCollection.findOne({ id: friendId });
+  const updateMe = { $set: { friendreq: [...me.friendreq, friendId] } };
+  const updateFriend = { $set: { friendrec: [...friend.friendrec, myId] } };
 
-    res.send("Richiesta Già Inviata!")
-  }
-  else if (me.friends.includes(friendId)){
-    res.send("Gli Utenti sono Già Amici!")
-  }
-  else{
+  if (me.friendreq.includes(friendId) || me.friendrec.includes(friendId)) {
+    res.send("Richiesta Già Inviata!");
+  } else if (me.friends.includes(friendId)) {
+    res.send("Gli Utenti sono Già Amici!");
+  } else {
     const filterMe = { id: myId };
-    const risMe = await usersCollection.updateOne(filterMe,updateMe);
-    const filterFriend = {id: friendId};
-    const risFriend = await usersCollection.updateOne(filterFriend,updateFriend);
-    res.send("richiesta di amicizia inviata")
+    const risMe = await usersCollection.updateOne(filterMe, updateMe);
+    const filterFriend = { id: friendId };
+    const risFriend = await usersCollection.updateOne(
+      filterFriend,
+      updateFriend
+    );
+    res.send("richiesta di amicizia inviata");
+  }
+});
+router.post("/confirmfriendrequest", async (req, res) => {
+  let newReq = req.body;
+
+  const myId = newReq.myId;
+  const friendId = newReq.friendId;
+  let me = await usersCollection.findOne({ id: myId });
+  let friend = await usersCollection.findOne({ id: friendId });
+  const updateMe = {
+    $set: { friendrec: [...me.friendrec.filter((rec) => rec !== friendId)] },
+  };
+  const updateFriend = {
+    $set: { friendreq: [...friend.friendreq.filter((requ) => requ !== myId)] },
+  };
+  const addFriendToMe = { $set: { friends: [...me.friends, friendId] } };
+  const addMeToFriend = { $set: { friends: [...friend.friends, myId] } };
+
+  async function clearReqRec() {
+    const filterMe = { id: myId };
+    const risMe = await usersCollection.updateOne(filterMe, updateMe);
+    const filterFriend = { id: friendId };
+    const risFriend = await usersCollection.updateOne(
+      filterFriend,
+      updateFriend
+    );
   }
 
-  
+  switch (newReq.confirmed) {
+    case true:
+      clearReqRec();
+      const risMe = await usersCollection.updateOne(
+        { id: myId },
+        addFriendToMe
+      );
+      const risFriend = await usersCollection.updateOne(
+        { id: friendId },
+        addMeToFriend
+      );
 
+      res.send("accettato");
+      break;
+    case false:
+      clearReqRec();
 
+      res.send("rifiutato");
+      break;
+  }
 });
 
 async function run() {
