@@ -10,6 +10,7 @@ const mongoClient = new MongoClient(dbURI);
 let feisbrutDB, postsCollection;
 
 router.get("/posts", async (req, res) => {
+  let data = [];
   const cursor = postsCollection.find({});
   await cursor.forEach((post) => {
     data.push(post);
