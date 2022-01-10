@@ -17,14 +17,18 @@ router.get("/posts", async (req, res) => {
   });
   res.send(data);
 });
-router.post("/getmypost", (req,res)=>{
+router.post("/getmypost", async (req,res)=>{
+  newReq = req.body;
+  
   let data = [];
   
-    const cursor = postsCollection.find({});
-    cursor.forEach((post) => {
+    const cursor = postsCollection.find();
+    await cursor.forEach((post) => {
       data.push(post);
     });
-    res.send(data);
+    let result = data.filter(item => [...newReq].includes(item.authorId)).reverse();
+    res.send(result);
+    
   
 
 })
