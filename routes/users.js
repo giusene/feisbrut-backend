@@ -23,7 +23,7 @@ router.post("/login", async (req, res) => {
   );
   
   if (result.length > 0) {
-    response = {
+   result = {
       id: user.id,
       name: user.name,
       surname: user.surname,
@@ -36,7 +36,7 @@ router.post("/login", async (req, res) => {
       messages: user.messages,
       confirmed: user.confirmed,
     };
-    res.send(response);
+    res.send(result);
   } else {
     res.send("Utente non trovato");
   }
