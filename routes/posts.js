@@ -6,8 +6,11 @@ const config = require("../config");
 
 const dbURI = `mongodb+srv://Canstopme0:${config.uriKey}@fesibrut-api.dkfxl.mongodb.net/posts?retryWrites=true&w=majority`;
 const mongoClient = new MongoClient(dbURI);
+const dbURI2 = `mongodb+srv://Canstopme0:${config.uriKey}@fesibrut-api.dkfxl.mongodb.net/users?retryWrites=true&w=majority`;
+const mongoClient2 = new MongoClient(dbURI2);
 
 let feisbrutDB, postsCollection;
+let feisbrutDB2, usersCollection;
 
 router.get("/posts", async (req, res) => {
   let data = [];
@@ -66,34 +69,60 @@ router.delete("/posts/:id", async (req, res) => {
 
 router.post("/like",async (req,res) =>{
   action = req.body
+   
   if(action.type === "like"){
     const postId = action.postId;
     let post = await postsCollection.findOne({ id: postId });
-
-    const update = { $set: {likes:[...post.likes,action.userId]} };
-    const filter = { id: postId };
-    const ris = await postsCollection.updateOne(filter, update);
+    let user = await usersCollection.findOne({ id: post.authorId });
+    
+    const updatePost = { $set: {likes:[...post.likes,action.userId]} };
+    const filterPost = { id: postId };
+    const filterUser = {id: user.id}
+    const updateUser = {$set:{
+      notify:[...user.notify,{
+          type:"like",
+          who:`${action.userId}`,
+          date:new Date().toISOString(),
+          read:false
+      }
+    ]
+    }}
+    const ris = await postsCollection.updateOne(filterPost, updatePost);usersCollection.updateOne(filterUser, updateUser);
+    
     res.send(`user id:${postId} updated`);
   } else if(action.type === "dislike"){
     const postId = action.postId;
     let post = await postsCollection.findOne({ id: postId });
+    let user = await usersCollection.findOne({ id: post.authorId });
     const dislike = post.likes.filter((like) => like !== action.userId)
     const update = { $set: {likes:[...dislike ]} };
     const filter = { id: postId };
+    const filterUser = {id: user.id}
+    const updateUser = {$set:{notify:user.notify.filter((not)=> not.who !== action.userId)}}
     const ris = await postsCollection.updateOne(filter, update);
+    /* usersCollection.updateOne(filterUser, updateUser);  */
+    
     res.send(`user id:${postId} updated`);
 
   }
 })
 
-async function run() {
+async function run1() {
   await mongoClient.connect();
   console.log("siamo connessi con atlas Post!");
 
   feisbrutDB = mongoClient.db("feisbrut");
   postsCollection = feisbrutDB.collection("posts");
 }
+async function run2() {
+  await mongoClient2.connect();
+  console.log("siamo connessi con atlas users!");
 
-run().catch((err) => console.log("Errore" + err));
+  feisbrutDB2 = mongoClient2.db("feisbrut");
+  usersCollection = feisbrutDB2.collection("users");
+}
+
+run1().catch((err) => console.log("Errore" + err));
+run2().catch((err) => console.log("Errore" + err));
 
 module.exports = router;
