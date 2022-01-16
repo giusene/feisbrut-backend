@@ -22,20 +22,7 @@ router.post("/login", async (req, res) => {
       user.confirmed
   );
   
-  if (result.length > 0) {
-   result = {
-      id: result.id,
-      name: result.name,
-      surname: result.surname,
-      email: result.email,
-      photo: result.photo,
-      friends: result.friends,
-      bio: result.bio,
-      friendreq: result.friendreq,
-      friendrec: result.friendrec,
-      messages: result.messages,
-      confirmed: result.confirmed,
-    };
+  if (result.length > 0) {   
     res.send(result);
   } else {
     res.send("Utente non trovato");
