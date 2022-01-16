@@ -24,17 +24,17 @@ router.post("/login", async (req, res) => {
   
   if (result.length > 0) {
    result = {
-      id: user.id,
-      name: user.name,
-      surname: user.surname,
-      email: user.email,
-      photo: user.photo,
-      friends: user.friends,
-      bio: user.bio,
-      friendreq: user.friendreq,
-      friendrec: user.friendrec,
-      messages: user.messages,
-      confirmed: user.confirmed,
+      id: result.id,
+      name: result.name,
+      surname: result.surname,
+      email: result.email,
+      photo: result.photo,
+      friends: result.friends,
+      bio: result.bio,
+      friendreq: result.friendreq,
+      friendrec: result.friendrec,
+      messages: result.messages,
+      confirmed: result.confirmed,
     };
     res.send(result);
   } else {
