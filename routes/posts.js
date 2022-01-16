@@ -64,6 +64,28 @@ router.delete("/posts/:id", async (req, res) => {
   res.status(200).send(`user id:${postId} removed`);
 });
 
+router.post("/like",async (req,res) =>{
+  action = req.body
+  if(action.type === "like"){
+    const postId = action.postId;
+    let post = await postsCollection.findOne({ id: postId });
+
+    const update = { $set: {likes:[...post.likes,action.userId]} };
+    const filter = { id: postId };
+    const ris = await postsCollection.updateOne(filter, update);
+    res.send(`user id:${postId} updated`);
+  } else if(action.type === "dislike"){
+    const postId = action.postId;
+    let post = await postsCollection.findOne({ id: postId });
+    const dislike = post.likes.filter((like) => like !== action.userId)
+    const update = { $set: {likes:[...dislike ]} };
+    const filter = { id: postId };
+    const ris = await postsCollection.updateOne(filter, update);
+    res.send(`user id:${postId} updated`);
+
+  }
+})
+
 async function run() {
   await mongoClient.connect();
   console.log("siamo connessi con atlas Post!");

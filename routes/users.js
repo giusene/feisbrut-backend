@@ -3,6 +3,7 @@ const { MongoClient } = require("mongodb");
 const fs = require("fs");
 const router = express.Router();
 const config = require("../config");
+const { response } = require("express");
 
 const dbURI = `mongodb+srv://Canstopme0:${config.uriKey}@fesibrut-api.dkfxl.mongodb.net/users?retryWrites=true&w=majority`;
 const mongoClient = new MongoClient(dbURI);
@@ -20,15 +21,29 @@ router.post("/login", async (req, res) => {
       user.password === newReq.password &&
       user.confirmed
   );
-  console.log(result);
+  
   if (result.length > 0) {
-    res.send(result);
+    response = {
+      id: user.id,
+      name: user.name,
+      surname: user.surname,
+      email: user.email,
+      photo: user.photo,
+      friends: user.friends,
+      bio: user.bio,
+      friendreq: user.friendreq,
+      friendrec: user.friendrec,
+      messages: user.messages,
+      confirmed: user.confirmed,
+    };
+    res.send(response);
   } else {
     res.send("Utente non trovato");
   }
 });
 
 router.get("/users", async (req, res) => {
+  
   let data = [];
   const cursor = usersCollection.find({});
   await cursor.forEach((user) => {
