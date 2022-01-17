@@ -100,7 +100,7 @@ router.post("/sendfriendrequest", async (req, res) => {
   let friend = await usersCollection.findOne({ id: friendId });
   const updateMe = { $set: { friendreq: [...me.friendreq, friendId] } };
   const updateFriend = { $set: { friendrec: [...friend.friendrec, myId],notify: [...friend.notify,{
-    type: "friendreq",
+    type: "friendrec",
     who: `${myId}`,
     date: new Date().toISOString(),
     read: false,
@@ -135,13 +135,13 @@ router.post("/confirmfriendrequest", async (req, res) => {
   const updateFriend = {
     $set: { friendreq: [...friend.friendreq.filter((requ) => requ !== myId)] },
   };
-  const addFriendToMe = { $set: { friends: [...me.friends, friendId],notify: [...me.notify,{
+  const addFriendToMe = { $set: { friends: [...me.friends, friendId] } };
+  const addMeToFriend = { $set: { friends: [...friend.friends, myId],notify: [...friend.notify,{
     type: "friendConfirmed",
-    who: `${friendId}`,
+    who: `${myId}`,
     date: new Date().toISOString(),
     read: false,
   }] } };
-  const addMeToFriend = { $set: { friends: [...friend.friends, myId] } };
 
   async function clearReqRec() {
     const filterMe = { id: myId };
