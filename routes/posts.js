@@ -26,7 +26,6 @@ router.post("/getmypost", async (req, res) => {
   let data = [];
   let users = [];
   let finalResult = [];
- 
 
   const cursor = postsCollection.find();
   await cursor.forEach((post) => {
@@ -35,28 +34,35 @@ router.post("/getmypost", async (req, res) => {
   let result = data
     .filter((item) => [...newReq].includes(item.authorId))
     .reverse();
-  
-    const cursorUsers = usersCollection.find();
-    await cursorUsers.forEach((user) => {
+
+  const cursorUsers = usersCollection.find();
+  await cursorUsers.forEach((user) => {
     users.push(user);
-    });
-    result.map((post)=>  {
-     const utenti = users.filter((user)=>user.id===post.authorId)
-     post = {
-       ...post,
-       authorName:utenti[0].name,
-       authorSurname:utenti[0].surname,
-       authorAlias:utenti[0].bio.alias,
-       authorPhoto:utenti[0].photo,
-      }
-      finalResult.push(post)
-  
-  
-  
-  })
-  
-  await res.send(finalResult);
-  
+  });
+  result.map((post) => {
+    const utenti = users.filter((user) => user.id === post.authorId);
+
+    post = {
+      ...post,
+      authorName: utenti[0].name,
+      authorSurname: utenti[0].surname,
+      authorAlias: utenti[0].bio.alias,
+      authorPhoto: utenti[0].photo,
+      comments: post.comments.map((comment) => {
+        const newUser = users.filter((user) => comment.authorId === user.id);
+        comment = {
+          ...comment,
+          authorName: newUser[0].name,
+          authorSurname: newUser[0].surname,
+          authorPhoto: newUser[0].photo,
+        };
+        return comment;
+      }),
+    };
+    finalResult.push(post);
+  });
+
+  res.send(finalResult);
 });
 
 router.get("/posts/:id", async (req, res) => {
@@ -103,7 +109,8 @@ router.post("/like", async (req, res) => {
     const filterUser = { id: user.id };
     const updateUser = {
       $set: {
-        notify: [...user.notify,
+        notify: [
+          ...user.notify,
           {
             type: "like",
             who: `${action.userId}`,
@@ -133,6 +140,26 @@ router.post("/like", async (req, res) => {
 
     res.send(`user id:${postId} updated`);
   }
+});
+router.post("/comments", async (req, res) => {
+  newReq = req.body;
+  postId = newReq.postId;
+  let post = await postsCollection.findOne({ id: postId });
+  const filter = { id: postId };
+  const update = {
+    $set: {
+      comments: [
+        ...post.comments,
+        {
+          authorId: newReq.authorId,
+          text: newReq.text,
+        },
+      ],
+    },
+  };
+
+  const ris = await postsCollection.updateOne(filter, update);
+  res.send(`user id:${postId} updated`);
 });
 
 async function run1() {
