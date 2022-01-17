@@ -41,10 +41,7 @@ router.get("/users", async (req, res) => {
       email: user.email,
       photo: user.photo,
       friends: user.friends,
-      bio: user.bio,
-      friendreq: user.friendreq,
-      friendrec: user.friendrec,
-      messages: user.messages,
+      bio: user.bio,      
       confirmed: user.confirmed,
     };
     data.push(user);

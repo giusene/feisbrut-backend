@@ -20,21 +20,34 @@ router.get("/posts", async (req, res) => {
   });
   res.send(data);
 });
-router.post("/getmypost", async (req,res)=>{
+router.post("/getmypost", async (req, res) => {
   newReq = req.body;
-  
-  let data = [];
-  
-    const cursor = postsCollection.find();
-    await cursor.forEach((post) => {
-      data.push(post);
-    });
-    let result = data.filter(item => [...newReq].includes(item.authorId)).reverse();
-    res.send(result);
-    
-  
 
-})
+  let data = [];
+  let finalResult = [];
+
+  const cursor = postsCollection.find();
+  await cursor.forEach((post) => {
+    data.push(post);
+  });
+  let result = data
+    .filter((item) => [...newReq].includes(item.authorId))
+    .reverse();
+  result.map(async (post)=>{
+    let user = await usersCollection.findOne({ id: post.authorId});
+    post = {
+      ...post,
+      authorName:user.name,
+      authorSurname:user.surname,
+      authorAlias:user.bio.alias,
+      authorPhoto:user.photo,
+    }
+    finalResult.push(post)
+  })
+    
+  console.log(finalResult)
+  res.send(finalResult);
+});
 
 router.get("/posts/:id", async (req, res) => {
   const postId = req.params["id"];
@@ -67,45 +80,50 @@ router.delete("/posts/:id", async (req, res) => {
   res.status(200).send(`user id:${postId} removed`);
 });
 
-router.post("/like",async (req,res) =>{
-  action = req.body
-   
-  if(action.type === "like"){
+router.post("/like", async (req, res) => {
+  action = req.body;
+
+  if (action.type === "like") {
     const postId = action.postId;
     let post = await postsCollection.findOne({ id: postId });
     let user = await usersCollection.findOne({ id: post.authorId });
-    
-    const updatePost = { $set: {likes:[...post.likes,action.userId]} };
+
+    const updatePost = { $set: { likes: [...post.likes, action.userId] } };
     const filterPost = { id: postId };
-    const filterUser = {id: user.id}
-    const updateUser = {$set:{
-      notify:[...user.notify,{
-          type:"like",
-          who:`${action.userId}`,
-          date:new Date().toISOString(),
-          read:false
-      }
-    ]
-    }}
-    const ris = await postsCollection.updateOne(filterPost, updatePost);usersCollection.updateOne(filterUser, updateUser);
-    
+    const filterUser = { id: user.id };
+    const updateUser = {
+      $set: {
+        notify: [...user.notify,
+          {
+            type: "like",
+            who: `${action.userId}`,
+            date: new Date().toISOString(),
+            read: false,
+          },
+        ],
+      },
+    };
+    const ris = await postsCollection.updateOne(filterPost, updatePost);
+    usersCollection.updateOne(filterUser, updateUser);
+
     res.send(`user id:${postId} updated`);
-  } else if(action.type === "dislike"){
+  } else if (action.type === "dislike") {
     const postId = action.postId;
     let post = await postsCollection.findOne({ id: postId });
     let user = await usersCollection.findOne({ id: post.authorId });
-    const dislike = post.likes.filter((like) => like !== action.userId)
-    const update = { $set: {likes:[...dislike ]} };
+    const dislike = post.likes.filter((like) => like !== action.userId);
+    const update = { $set: { likes: [...dislike] } };
     const filter = { id: postId };
-    const filterUser = {id: user.id}
-    const updateUser = {$set:{notify:user.notify.filter((not)=> not.who !== action.userId)}}
+    const filterUser = { id: user.id };
+    const updateUser = {
+      $set: { notify: user.notify.filter((not) => not.who !== action.userId) },
+    };
     const ris = await postsCollection.updateOne(filter, update);
     /* usersCollection.updateOne(filterUser, updateUser);  */
-    
-    res.send(`user id:${postId} updated`);
 
+    res.send(`user id:${postId} updated`);
   }
-})
+});
 
 async function run1() {
   await mongoClient.connect();
