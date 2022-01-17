@@ -24,7 +24,9 @@ router.post("/getmypost", async (req, res) => {
   newReq = req.body;
 
   let data = [];
+  let users = [];
   let finalResult = [];
+ 
 
   const cursor = postsCollection.find();
   await cursor.forEach((post) => {
@@ -33,20 +35,28 @@ router.post("/getmypost", async (req, res) => {
   let result = data
     .filter((item) => [...newReq].includes(item.authorId))
     .reverse();
-  result.map(async (post)=>{
-    let user = await usersCollection.findOne({ id: post.authorId});
-    post = {
-      ...post,
-      authorName:user.name,
-      authorSurname:user.surname,
-      authorAlias:user.bio.alias,
-      authorPhoto:user.photo,
-    }
-    finalResult.push(post)
+  
+    const cursorUsers = usersCollection.find();
+    await cursorUsers.forEach((user) => {
+    users.push(user);
+    });
+    result.map((post)=>  {
+     const utenti = users.filter((user)=>user.id===post.authorId)
+     post = {
+       ...post,
+       authorName:utenti[0].name,
+       authorSurname:utenti[0].surname,
+       authorAlias:utenti[0].bio.alias,
+       authorPhoto:utenti[0].photo,
+      }
+      finalResult.push(post)
+  
+  
+  
   })
-    
-  console.log(finalResult)
-  res.send(finalResult);
+  
+  await res.send(finalResult);
+  
 });
 
 router.get("/posts/:id", async (req, res) => {
