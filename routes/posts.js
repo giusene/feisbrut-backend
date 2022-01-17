@@ -58,6 +58,16 @@ router.post("/getmypost", async (req, res) => {
         };
         return comment;
       }),
+      likes: post.likes.map((like) => {
+        const newUser = users.filter((user) => like === user.id);
+        newLike = {
+          authorId: like,
+          authorName: newUser[0].name,
+          authorSurname: newUser[0].surname,
+          authorPhoto: newUser[0].photo,
+        };
+        return newLike;
+      }),
     };
     finalResult.push(post);
   });
@@ -145,6 +155,7 @@ router.post("/comments", async (req, res) => {
   newReq = req.body;
   postId = newReq.postId;
   let post = await postsCollection.findOne({ id: postId });
+  let user = await usersCollection.findOne({ id: post.authorId });
   const filter = { id: postId };
   const update = {
     $set: {
@@ -157,8 +168,23 @@ router.post("/comments", async (req, res) => {
       ],
     },
   };
+  const filterUser = { id: user.id };
+  const updateUser = {
+    $set: {
+      notify: [
+        ...user.notify,
+        {
+          type: "comment",
+          who: `${newReq.authorId}`,
+          date: new Date().toISOString(),
+          read: false,
+        },
+      ],
+    },
+  };
 
   const ris = await postsCollection.updateOne(filter, update);
+  await usersCollection.updateOne(filterUser, updateUser);
   res.send(`user id:${postId} updated`);
 });
 

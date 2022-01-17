@@ -4,6 +4,7 @@ const fs = require("fs");
 const router = express.Router();
 const config = require("../config");
 const { response } = require("express");
+const { Z_ASCII } = require("zlib");
 
 const dbURI = `mongodb+srv://Canstopme0:${config.uriKey}@fesibrut-api.dkfxl.mongodb.net/users?retryWrites=true&w=majority`;
 const mongoClient = new MongoClient(dbURI);
@@ -98,7 +99,13 @@ router.post("/sendfriendrequest", async (req, res) => {
   let me = await usersCollection.findOne({ id: myId });
   let friend = await usersCollection.findOne({ id: friendId });
   const updateMe = { $set: { friendreq: [...me.friendreq, friendId] } };
-  const updateFriend = { $set: { friendrec: [...friend.friendrec, myId] } };
+  const updateFriend = { $set: { friendrec: [...friend.friendrec, myId],notify: [...friend.notify,{
+    type: "friendreq",
+    who: `${myId}`,
+    date: new Date().toISOString(),
+    read: false,
+  }] } };
+  
 
   if (me.friendreq.includes(friendId) || me.friendrec.includes(friendId)) {
     res.send("Richiesta Già Inviata!");
@@ -128,7 +135,12 @@ router.post("/confirmfriendrequest", async (req, res) => {
   const updateFriend = {
     $set: { friendreq: [...friend.friendreq.filter((requ) => requ !== myId)] },
   };
-  const addFriendToMe = { $set: { friends: [...me.friends, friendId] } };
+  const addFriendToMe = { $set: { friends: [...me.friends, friendId],notify: [...me.notify,{
+    type: "friendConfirmed",
+    who: `${friendId}`,
+    date: new Date().toISOString(),
+    read: false,
+  }] } };
   const addMeToFriend = { $set: { friends: [...friend.friends, myId] } };
 
   async function clearReqRec() {
@@ -162,6 +174,28 @@ router.post("/confirmfriendrequest", async (req, res) => {
       break;
   }
 });
+router.post('/getfriends',async (req,res)=>{
+  newReq = req.body
+  let data = [];
+  const cursor = usersCollection.find({});
+  await cursor.forEach((user) => {
+    user = {
+      id: user.id,
+      name: user.name,
+      surname: user.surname,
+      email: user.email,
+      photo: user.photo,
+      friends: user.friends,
+      bio: user.bio,
+      cover:user.cover     
+      
+    };
+    data.push(user);
+  });
+  const result = data.filter(item => [...newReq].includes(item.id))
+  console.log(result)
+  res.send(result)
+})
 
 async function run() {
   await mongoClient.connect();
