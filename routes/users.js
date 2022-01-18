@@ -22,9 +22,84 @@ router.post("/login", async (req, res) => {
       user.password === newReq.password &&
       user.confirmed
   );
+  let newUser = await usersCollection.findOne({email:newReq.email})
+  let notifyId= newUser.notify.map(not=>not.who)
+  let friendsNot = [];
+  notifyId.forEach(element=>data.map(friend=>{if(friend.id===element){let newFriend= {name:friend.name,surname:friend.surname,photo:friend.photo,id:friend.id};friendsNot.push(newFriend)}}));
+  const ids = friendsNot.map(o => o.id)
+  const filtered = friendsNot.filter(({id}, index) => !ids.includes(id, index + 1));
+
+  
+  
+  let finalResult = result.map((user)=>{
+
+
+    let myFriends = []
+    let iteration = [...user.friends].map((friendsId)=>[...data].filter((friend)=>friend.id===friendsId))      
+    iteration.map((user)=>{user.map((friend)=>myFriends.push(friend))})
+    let myFinalFriends = myFriends.map((friend)=> {return friend={
+      name:friend.name,
+      surname:friend.surname,
+      photo:friend.photo,
+      id:friend.id
+    }});
+    let myFriendsReq = []
+    let iteration2 = [...user.friendreq].map((friendsId)=>[...data].filter((friend)=>friend.id===friendsId))      
+    iteration2.map((user)=>{user.map((friend)=>myFriendsReq.push(friend))})
+    let myFinalFriendsReq = myFriendsReq.map((friend)=> {return friend={
+      name:friend.name,
+      surname:friend.surname,
+      photo:friend.photo,
+      id:friend.id
+    }});
+    let myFriendsRec = []
+    let iteration3 = [...user.friendrec].map((friendsId)=>[...data].filter((friend)=>friend.id===friendsId))      
+    iteration3.map((user)=>{user.map((friend)=>myFriendsRec.push(friend))})
+    let myFinalFriendsRec = myFriendsRec.map((friend)=> {return friend={
+      name:friend.name,
+      surname:friend.surname,
+      photo:friend.photo,
+      id:friend.id
+    }});
+    let myNotify = []
+    let iteration4= [...user.notify].map((not)=>myNotify.push(not)) 
+    let finalNotify = myNotify.map(not=>{return newNot= {
+      ...not,
+      user: filtered.filter(friend=> friend.id===not.who)
+     
+    }})
+    
+    
+
+
+
+       
+    
+    return user = {
+        id: user.id,
+        name: user.name,
+        surname: user.surname,
+        email: user.email,
+        photo: user.photo,
+        friends: [...myFinalFriends],
+        bio: user.bio,
+        friendreq: [...myFinalFriendsReq],
+        friendrec:[...myFinalFriendsRec],
+        messages: user.messages,
+        confirmed:user.confirmed,
+        notify:[...finalNotify]
+        
+        
+      }
+      
+    })
+    
+    
+   
+    
   
   if (result.length > 0) {   
-    res.send(result);
+    res.send(finalResult);
   } else {
     res.send("Utente non trovato");
   }
@@ -193,7 +268,7 @@ router.post('/getfriends',async (req,res)=>{
     data.push(user);
   });
   const result = data.filter(item => [...newReq].includes(item.id))
-  console.log(result)
+  
   res.send(result)
 })
 
