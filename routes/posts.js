@@ -181,7 +181,7 @@ router.post("/comments", async (req, res) => {
           who: `${newReq.authorId}`,
           date: new Date().toISOString(),
           read: false,
-          id:post.id,
+          id:postId,
         },
       ],
     },
