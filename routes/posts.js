@@ -55,6 +55,7 @@ router.post("/getmypost", async (req, res) => {
           authorName: newUser[0].name,
           authorSurname: newUser[0].surname,
           authorPhoto: newUser[0].photo,
+           
         };
         return comment;
       }),
@@ -126,6 +127,7 @@ router.post("/like", async (req, res) => {
             who: `${action.userId}`,
             date: new Date().toISOString(),
             read: false,
+            id:postId
           },
         ],
       },
@@ -164,6 +166,7 @@ router.post("/comments", async (req, res) => {
         {
           authorId: newReq.authorId,
           text: newReq.text,
+          date: newReq.date
         },
       ],
     },
@@ -178,6 +181,7 @@ router.post("/comments", async (req, res) => {
           who: `${newReq.authorId}`,
           date: new Date().toISOString(),
           read: false,
+          id:post.id,
         },
       ],
     },
