@@ -89,7 +89,7 @@ router.post("/posts", async (req, res) => {
   const ris = await postsCollection.insertOne(newObject);
 
   if (ris.acknowledged) {
-    res.status(200).send(newPostId);
+    res.status(200).send(JSON.stringify(newPostId));
   }
 });
 
@@ -104,7 +104,7 @@ router.patch("/posts/:id", async (req, res) => {
 router.delete("/posts/:id", async (req, res) => {
   const postId = req.params["id"];
   const ris = await postsCollection.deleteOne({ id: postId });
-  res.status(200).send.json(`user id:${postId} removed`);
+  res.status(200).send(`user id:${postId} removed`);
 });
 
 router.post("/like", async (req, res) => {

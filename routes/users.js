@@ -305,7 +305,35 @@ router.post('/getfriends',async (req,res)=>{
   res.send(JSON.stringify(result))
 });
 
+router.post('/notificationmanager', async (req,res)=>{
 
+  newReq = req.body
+
+  if(newReq.type==="delete"){
+    newReq.notification_id.map(not=> usersCollection.updateOne({id:newReq.userId},{$pull:{notify:{notify_id:not}}}));
+    res.send("notifiche cancellate con successo")
+
+
+
+  } else if(newReq.type==='patch'){
+    const user = await usersCollection.findOne({id:newReq.userId})    
+    let notifications = [];
+    const iteration= newReq.notification_id.map(not=> user.notify.filter((noti)=> {noti.notify_id===not && notifications.push(noti)}));
+    let final =[];
+    await notifications.forEach((notification)=> {
+       newNotification = {
+        ...notification,
+        read:true
+      };
+    final.push(newNotification)})
+    newReq.notification_id.map(not=> usersCollection.updateOne({id:newReq.userId},{$pull:{notify:{notify_id:not}}}));
+    final.map(not=> usersCollection.updateOne({id:newReq.userId},{$push:{notify:not}}));
+    
+    console.log(final)
+    res.send("notifiche aggiornate con successo")
+  }
+
+})
 
 
 
