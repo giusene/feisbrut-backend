@@ -119,7 +119,8 @@ router.post("/login", async (req, res) => {
   if (result.length > 0) {   
     res.send(JSON.stringify(finalResult));
   } else {
-    res.send("Utente non trovato");
+    const response = [{response:"Utente non trovato"}]
+    res.send(JSON.stringify(response));
   }
 });
 
@@ -311,8 +312,8 @@ router.post('/notificationmanager', async (req,res)=>{
 
   if(newReq.type==="delete"){
     newReq.notification_id.map(not=> usersCollection.updateOne({id:newReq.userId},{$pull:{notify:{notify_id:not}}}));
-    const response = "notifiche cancellate con successo"
-    res.send(response)
+    const response = [{response:"notifiche cancellate con successo"}]
+    res.send(JSON.stringify(response))
 
 
 
@@ -331,8 +332,8 @@ router.post('/notificationmanager', async (req,res)=>{
     final.map(not=> usersCollection.updateOne({id:newReq.userId},{$push:{notify:not}}));
     
     console.log(final)
-    const response = "notifiche aggiornate con successo"
-    res.send(response)
+    const response = [{response:"notifiche aggiornate con successo"}]
+    res.send(JSON.stringify(response))
   }
 
 })
