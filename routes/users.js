@@ -119,8 +119,8 @@ router.post("/login", async (req, res) => {
   if (result.length > 0) {   
     res.send(JSON.stringify(finalResult));
   } else {
-    const response = [{response:"Utente non trovato"}]
-    res.send(JSON.stringify(response));
+    
+    res.send("Utente non trovato");
   }
 });
 
