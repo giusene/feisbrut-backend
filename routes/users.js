@@ -117,10 +117,10 @@ router.post("/login", async (req, res) => {
     
   
   if (result.length > 0) {   
-    res.send(JSON.stringify(finalResult));
+    res.send(finalResult);
   } else {
     
-    res.send("Utente non trovato");
+    res.send([{response:"Utente non trovato"}]);
   }
 });
 
@@ -141,7 +141,7 @@ router.get("/users", async (req, res) => {
     };
     data.push(user);
   });
-  res.send(JSON.stringify(data));
+  res.send(data);
 });
 router.get("/users/:id", async (req, res) => {
   let data = [];
@@ -174,7 +174,7 @@ router.get("/users/:id", async (req, res) => {
     bio: user.bio,    
     confirmed: user.confirmed,
   };
-  res.send(JSON.stringify(user));
+  res.send(user);
 });
 router.post("/users", async (req, res) => {
   const newUserId = Date.now().toString();
@@ -183,7 +183,7 @@ router.post("/users", async (req, res) => {
   const ris = await usersCollection.insertOne(newObject);
 
   if (ris.acknowledged) {
-    res.status(200).send(JSON.stringify(newUserId));
+    res.status(200).send(newUserId);
   }
 });
 
@@ -192,12 +192,12 @@ router.patch("/users/:id", async (req, res) => {
   const update = { $set: req.body };
   const filter = { id: userId };
   const ris = await usersCollection.updateOne(filter, update);
-  res.send(`user id:${userId} updated`);
+  res.send([{response_:`user id:${userId} updated`}]);
 });
 router.delete("/users/:id", async (req, res) => {
   const userId = req.params["id"];
   const ris = await usersCollection.deleteOne({ id: userId });
-  res.status(200).send(`user id:${userId} removed`);
+  res.status(200).send([{response_:`user id:${userId} removed`}]);
 });
 
 router.post("/sendfriendrequest", async (req, res) => {
@@ -217,9 +217,9 @@ router.post("/sendfriendrequest", async (req, res) => {
   
 
   if (me.friendreq.includes(friendId) || me.friendrec.includes(friendId)) {
-    res.send("Richiesta Già Inviata!");
+    res.send([{response_:"Richiesta Già Inviata!"}]);
   } else if (me.friends.includes(friendId)) {
-    res.send("Gli Utenti sono Già Amici!");
+    res.send([{response_:"Gli Utenti sono Già Amici!"}]);
   } else {
     const filterMe = { id: myId };
     const risMe = await usersCollection.updateOne(filterMe, updateMe);
@@ -228,7 +228,7 @@ router.post("/sendfriendrequest", async (req, res) => {
       filterFriend,
       updateFriend
     );
-    res.send("richiesta di amicizia inviata");
+    res.send([{response_:"richiesta di amicizia inviata"}]);
   }
 });
 router.post("/confirmfriendrequest", async (req, res) => {
@@ -274,12 +274,12 @@ router.post("/confirmfriendrequest", async (req, res) => {
         addMeToFriend
       );
 
-      res.send("accettato");
+      res.send([{response:"accettato"}]);
       break;
     case false:
       clearReqRec();
 
-      res.send("rifiutato");
+      res.send([{response:"rifiutato"}]);
       break;
   }
 });
@@ -303,7 +303,7 @@ router.post('/getfriends',async (req,res)=>{
   });
   const result = data.filter(item => [...newReq].includes(item.id))
   
-  res.send(JSON.stringify(result))
+  res.send(result)
 });
 
 router.post('/notificationmanager', async (req,res)=>{
@@ -313,7 +313,7 @@ router.post('/notificationmanager', async (req,res)=>{
   if(newReq.type==="delete"){
     newReq.notification_id.map(not=> usersCollection.updateOne({id:newReq.userId},{$pull:{notify:{notify_id:not}}}));
     const response = [{response:"notifiche cancellate con successo"}]
-    res.send(JSON.stringify(response))
+    res.send(response)
 
 
 
@@ -333,8 +333,41 @@ router.post('/notificationmanager', async (req,res)=>{
     
     console.log(final)
     const response = [{response:"notifiche aggiornate con successo"}]
-    res.send(JSON.stringify(response))
+    res.send(response)
   }
+
+})
+router.post('/searchbar', async (req,res)=>{
+
+  newReq = req.body
+  let data = [];
+  let query = newReq.text.replace(/\s/g, "")
+  const cursor = usersCollection.find({});
+  await cursor.forEach((user) => {
+    user = {
+      id: user.id,
+      queryName: user.name + user.surname,
+      name:user.name,
+      surname:user.surname,            
+      photo: user.photo,
+      friends: user.friends,
+      bio: user.bio,
+      cover:user.cover     
+      
+    };
+    data.push(user);
+  });
+  
+  
+  const filtered = data.filter(user => user.id !== newReq.author_id )
+  const finalUser =[];
+   filtered.filter(user => user.queryName.toLocaleLowerCase().search(query.toLocaleLowerCase()) > -1 && finalUser.push(user))
+ 
+ console.log(finalUser)
+ if(finalUser.length > 0){
+
+   res.send(finalUser)
+ } else { res.send([{response:"nessun utente trovato"}])}
 
 })
 

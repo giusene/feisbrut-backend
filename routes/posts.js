@@ -18,7 +18,7 @@ router.get("/posts", async (req, res) => {
   await cursor.forEach((post) => {
     data.push(post);
   });
-  res.send(JSON.stringify(data));
+  res.send(data);
 });
 router.post("/getmypost", async (req, res) => {
   newReq = req.body;
@@ -73,14 +73,14 @@ router.post("/getmypost", async (req, res) => {
     finalResult.push(post);
   });
 
-  res.send(JSON.stringify(finalResult));
+  res.send(finalResult);
 });
 
 router.get("/posts/:id", async (req, res) => {
   const postId = req.params["id"];
   let post = await postsCollection.findOne({ id: postId });
 
-  res.send(JSON.stringify(post));
+  res.send(post);
 });
 router.post("/posts", async (req, res) => {
   const newPostId = Date.now().toString();
@@ -89,7 +89,7 @@ router.post("/posts", async (req, res) => {
   const ris = await postsCollection.insertOne(newObject);
 
   if (ris.acknowledged) {
-    res.status(200).send(JSON.stringify(newPostId));
+    res.status(200).send(newPostId);
   }
 });
 
@@ -99,12 +99,12 @@ router.patch("/posts/:id", async (req, res) => {
   const filter = { id: postId };
   const ris = await postsCollection.updateOne(filter, update);
 
-  res.send(`user id:${postId} updated`);
+  res.send([{response:`post id:${postId} updated`}]);
 });
 router.delete("/posts/:id", async (req, res) => {
   const postId = req.params["id"];
   const ris = await postsCollection.deleteOne({ id: postId });
-  res.status(200).send(`user id:${postId} removed`);
+  res.status(200).send([{response:`post id:${postId} removed`}]);
 });
 
 router.post("/like", async (req, res) => {
@@ -138,7 +138,7 @@ router.post("/like", async (req, res) => {
     const ris = await postsCollection.updateOne(filterPost, updatePost);
     usersCollection.updateOne(filterUser, updateUser);
 
-    res.send(`user id:${postId} updated`);
+    res.send([{response:`post id:${postId} updated`}]);
   } else if (action.type === "dislike") {
     const postId = action.postId;
     let post = await postsCollection.findOne({ id: postId });
@@ -153,7 +153,7 @@ router.post("/like", async (req, res) => {
     const ris = await postsCollection.updateOne(filter, update);
     /* usersCollection.updateOne(filterUser, updateUser);  */
 
-    res.send(`user id:${postId} updated`);
+    res.send([{response:`post id:${postId} updated`}]);
   }
 });
 router.post("/comments", async (req, res) => {
@@ -193,7 +193,7 @@ router.post("/comments", async (req, res) => {
 
   const ris = await postsCollection.updateOne(filter, update);
   await usersCollection.updateOne(filterUser, updateUser);
-  res.send(`user id:${postId} updated`);
+  res.send([{response:`user id:${postId} updated`}]);
 });
 
 async function run1() {
