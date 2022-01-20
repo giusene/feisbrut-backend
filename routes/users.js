@@ -311,7 +311,8 @@ router.post('/notificationmanager', async (req,res)=>{
 
   if(newReq.type==="delete"){
     newReq.notification_id.map(not=> usersCollection.updateOne({id:newReq.userId},{$pull:{notify:{notify_id:not}}}));
-    res.send("notifiche cancellate con successo")
+    const response = "notifiche cancellate con successo"
+    res.send(response)
 
 
 
@@ -330,7 +331,8 @@ router.post('/notificationmanager', async (req,res)=>{
     final.map(not=> usersCollection.updateOne({id:newReq.userId},{$push:{notify:not}}));
     
     console.log(final)
-    res.send("notifiche aggiornate con successo")
+    const response = "notifiche aggiornate con successo"
+    res.send(response)
   }
 
 })
