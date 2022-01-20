@@ -68,7 +68,25 @@ router.post("/login", async (req, res) => {
       user: filtered.filter(friend=> friend.id===not.who)
      
     }})
-    
+
+////////// QUELLO CHE HO AGGIUNTO O MODIFICATO IO ////////////////////
+    let newMessages = {};
+    Object.keys(user.messages).forEach(single => {
+      const friendFinder = data.filter((friend)=>friend.id===single)
+      newMessages =  {
+        ...newMessages,
+        [single]: {
+          discussion: user.messages[single],
+          user: {
+            name: friendFinder[0].name,
+            surname:  friendFinder[0].surname,
+            photo:  friendFinder[0].photo,
+            id:  friendFinder[0].id
+          },
+        }
+      }
+    })
+   
     
 
 
@@ -85,7 +103,7 @@ router.post("/login", async (req, res) => {
         bio: user.bio,
         friendreq: [...myFinalFriendsReq],
         friendrec:[...myFinalFriendsRec],
-        messages: user.messages,
+        messages: newMessages,
         confirmed:user.confirmed,
         notify:[...finalNotify]
         
@@ -125,19 +143,34 @@ router.get("/users", async (req, res) => {
   res.send(data);
 });
 router.get("/users/:id", async (req, res) => {
+  let data = [];
+  const cursor = usersCollection.find({});
+  await cursor.forEach((user) => {    
+    data.push(user);
+  });
+
   const userId = req.params["id"];
   let user = await usersCollection.findOne({ id: userId });
+
+  let myFriends = []
+  let iteration = [...user.friends].map((friendsId)=>[...data].filter((friend)=>friend.id===friendsId))      
+  iteration.map((user)=>{user.map((friend)=>myFriends.push(friend))})
+  let myFinalFriends = myFriends.map((friend)=> {return friend={
+    name:friend.name,
+    surname:friend.surname,
+    photo:friend.photo,
+    id:friend.id
+  }});
+
+
   user = {
     id: user.id,
     name: user.name,
     surname: user.surname,
     email: user.email,
     photo: user.photo,
-    friends: user.friends,
-    bio: user.bio,
-    friendreq: user.friendreq,
-    friendrec: user.friendrec,
-    messages: user.messages,
+    friends: [...myFinalFriends],
+    bio: user.bio,    
     confirmed: user.confirmed,
   };
   res.send(user);
@@ -270,7 +303,11 @@ router.post('/getfriends',async (req,res)=>{
   const result = data.filter(item => [...newReq].includes(item.id))
   
   res.send(result)
-})
+});
+
+
+
+
 
 async function run() {
   await mongoClient.connect();

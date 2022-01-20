@@ -108,6 +108,8 @@ router.delete("/posts/:id", async (req, res) => {
 });
 
 router.post("/like", async (req, res) => {
+
+  
   action = req.body;
 
   if (action.type === "like") {
@@ -127,7 +129,8 @@ router.post("/like", async (req, res) => {
             who: `${action.userId}`,
             date: new Date().toISOString(),
             read: false,
-            id:postId
+            postID:postId,
+            notify_id:Date.now().toString()
           },
         ],
       },
@@ -181,7 +184,8 @@ router.post("/comments", async (req, res) => {
           who: `${newReq.authorId}`,
           date: new Date().toISOString(),
           read: false,
-          id:postId,
+          postID:postId,
+          notify_id:Date.now().toString()
         },
       ],
     },
