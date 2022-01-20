@@ -117,7 +117,7 @@ router.post("/login", async (req, res) => {
     
   
   if (result.length > 0) {   
-    res.send(finalResult);
+    res.send(JSON.stringify(finalResult));
   } else {
     res.send("Utente non trovato");
   }
@@ -140,7 +140,7 @@ router.get("/users", async (req, res) => {
     };
     data.push(user);
   });
-  res.send(data);
+  res.send(JSON.stringify(data));
 });
 router.get("/users/:id", async (req, res) => {
   let data = [];
@@ -173,7 +173,7 @@ router.get("/users/:id", async (req, res) => {
     bio: user.bio,    
     confirmed: user.confirmed,
   };
-  res.send(user);
+  res.send(JSON.stringify(user));
 });
 router.post("/users", async (req, res) => {
   const newUserId = Date.now().toString();
@@ -182,7 +182,7 @@ router.post("/users", async (req, res) => {
   const ris = await usersCollection.insertOne(newObject);
 
   if (ris.acknowledged) {
-    res.status(200).send(newUserId);
+    res.status(200).send(JSON.stringify(newUserId));
   }
 });
 
@@ -302,7 +302,7 @@ router.post('/getfriends',async (req,res)=>{
   });
   const result = data.filter(item => [...newReq].includes(item.id))
   
-  res.send(result)
+  res.send(JSON.stringify(result))
 });
 
 

@@ -18,7 +18,7 @@ router.get("/posts", async (req, res) => {
   await cursor.forEach((post) => {
     data.push(post);
   });
-  res.send(data);
+  res.send(JSON.stringify(data));
 });
 router.post("/getmypost", async (req, res) => {
   newReq = req.body;
@@ -73,14 +73,14 @@ router.post("/getmypost", async (req, res) => {
     finalResult.push(post);
   });
 
-  res.send(finalResult);
+  res.send(JSON.stringify(finalResult));
 });
 
 router.get("/posts/:id", async (req, res) => {
   const postId = req.params["id"];
   let post = await postsCollection.findOne({ id: postId });
 
-  res.send(post);
+  res.send(JSON.stringify(post));
 });
 router.post("/posts", async (req, res) => {
   const newPostId = Date.now().toString();
@@ -104,7 +104,7 @@ router.patch("/posts/:id", async (req, res) => {
 router.delete("/posts/:id", async (req, res) => {
   const postId = req.params["id"];
   const ris = await postsCollection.deleteOne({ id: postId });
-  res.status(200).send(`user id:${postId} removed`);
+  res.status(200).send.json(`user id:${postId} removed`);
 });
 
 router.post("/like", async (req, res) => {
