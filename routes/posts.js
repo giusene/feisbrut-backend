@@ -231,7 +231,7 @@ router.post("/like", async (req, res) => {
 
   /* -----------------------------------------------------POSTS COMMENTS---------------------------------------------------------------------- */
 router.post("/comments", async (req, res) => {
-  newReq = req.body;
+  action = req.body;
   postId = newReq.postId;
   let post = await postsCollection.findOne({ id: postId });
   let user = await usersCollection.findOne({ id: post.authorId });
