@@ -581,6 +581,41 @@ router.post("/searchbar", async (req, res) => {
 
  /* -----------------------------------------------------/SEARCHBAR---------------------------------------------------------------------- */
 
+ /* -----------------------------------------------------RANDOMUSER---------------------------------------------------------------------- */
+ router.post('/randomusers', async (req,res)=>{
+   newReq = req.body;
+   let data =[];
+
+  const cursor = usersCollection.find({});
+  await cursor.forEach((user) => {
+    user = {
+      id: user.id,      
+      name: user.name,
+      surname: user.surname,
+      photo: user.photo,
+      friends: user.friends,
+      bio: user.bio,
+      cover: user.cover,
+      confirmed: user.confirmed
+    };
+    data.push(user);
+  });
+    let filtered=[]
+    newReq.friends.map(friend =>  filtered = data.filter(user => user.id !== newReq.userId && user.id !== friend && user.confirmed));
+    
+    
+    
+    const shuffled = filtered.sort(() => 0.5 - Math.random());
+    let selected = shuffled.slice(0, 4);
+    
+    if(selected.length > 0){
+
+      res.send(selected)
+    } else {res.send([{response:'nessun utente trovato'}])}
+
+ })
+ /* -----------------------------------------------------/RANDOMUSER---------------------------------------------------------------------- */
+
 
 
   /* -----------------------------------------------------CONNECTIONS---------------------------------------------------------------------- */
