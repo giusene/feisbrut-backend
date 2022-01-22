@@ -232,7 +232,7 @@ router.post("/like", async (req, res) => {
   /* -----------------------------------------------------POSTS COMMENTS---------------------------------------------------------------------- */
 router.post("/comments", async (req, res) => {
   action = req.body;
-  postId = newReq.postId;
+  postId = action.postId;
   let post = await postsCollection.findOne({ id: postId });
   let user = await usersCollection.findOne({ id: post.authorId });
   const filter = { id: postId };
@@ -241,9 +241,9 @@ router.post("/comments", async (req, res) => {
       comments: [
         ...post.comments,
         {
-          authorId: newReq.authorId,
-          text: newReq.text,
-          date: newReq.date
+          authorId: action.authorId,
+          text: action.text,
+          date: action.date
         },
       ],
     },
@@ -255,7 +255,7 @@ router.post("/comments", async (req, res) => {
         ...user.notify,
         {
           type: "comment",
-          who: `${newReq.authorId}`,
+          who: `${action.authorId}`,
           date: new Date().toISOString(),
           read: false,
           postID:postId,
@@ -266,7 +266,7 @@ router.post("/comments", async (req, res) => {
   };
 
   const ris = await postsCollection.updateOne(filter, update);
-  if(action.userId !== user.id  ){
+  if(action.authorId !== user.id  ){
 
     const ris2 = usersCollection.updateOne(filterUser, updateUser);
 
