@@ -208,6 +208,14 @@ router.post('/checksession',async (req,res) =>{
     const ris = await usersCollection.updateOne(filter, update);
      
     res.send([{resp:"Utente Confermato",verified:true}])
+  } else if(newReq.user_token === user.user_token && !user.checkSession){
+
+    let token= randomString(32, '#aA')
+    let timeNow =  Date.now()
+    const update = { $set: {login_time:timeNow,user_token:token,logged:true }};
+    const filter = { id: newReq.userId };
+    const ris = await usersCollection.updateOne(filter, update);
+
   } else{
     res.send([{resp:"Utente Non Confermato",verified:false}])
   }
@@ -433,25 +441,26 @@ router.post("/notificationmanager", async (req, res) => {
     let notifications = [];
     const iteration = newReq.notification_id.map((not) =>
       user.notify.filter((noti) => {
-        noti.notify_id === not && notifications.push(noti);
+        noti.notify_id === not && notifications.push(noti) ;
       })
     );
     let final = [];
-    await notifications.forEach((notification) => {
+     notifications.forEach((notification) => {
       newNotification = {
         ...notification,
         read: true,
       };
       final.push(newNotification);
     });
-    newReq.notification_id.map((not) =>
-      usersCollection.updateOne(
+    
+    newReq.notification_id.map(async (not) =>
+      await usersCollection.updateOne(
         { id: newReq.userId },
         { $pull: { notify: { notify_id: not } } }
       )
     );
-    final.map((not) =>
-      usersCollection.updateOne(
+    final.map(async (not) =>
+      await usersCollection.updateOne(
         { id: newReq.userId },
         { $push: { notify: not } }
       )
