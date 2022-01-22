@@ -12,6 +12,12 @@ const mongoClient2 = new MongoClient(dbURI2);
 let feisbrutDB, postsCollection;
 let feisbrutDB2, usersCollection;
 
+
+
+
+
+
+ /* -----------------------------------------------------GLOBAL POST GET---------------------------------------------------------------------- */
 router.get("/posts", async (req, res) => {
   let data = [];
   const cursor = postsCollection.find({});
@@ -20,6 +26,92 @@ router.get("/posts", async (req, res) => {
   });
   res.send(data);
 });
+
+  /* -----------------------------------------------------/GLOBAL POST GET---------------------------------------------------------------------- */
+
+
+  /* -----------------------------------------------------POSTS POST---------------------------------------------------------------------- */
+router.post("/posts", async (req, res) => {
+  const newPostId = Date.now().toString();
+  newReq = req.body;
+  let newObject = { id: newPostId, ...newReq };
+  const ris = await postsCollection.insertOne(newObject);
+
+  if (ris.acknowledged) {
+    res.status(200).send(newPostId);
+  }
+});
+  /* -----------------------------------------------------/POSTS POST---------------------------------------------------------------------- */
+
+
+  /* -----------------------------------------------------GET SINGLE POST---------------------------------------------------------------------- */
+ router.get("/posts/:id", async (req, res) => {
+ const postId = req.params["id"];
+ let post = await postsCollection.findOne({ id: postId });
+
+ let users = [];
+ const cursorUsers = usersCollection.find();
+  await cursorUsers.forEach((user) => {
+    users.push(user);
+  });
+  const utenti = users.filter((user) => user.id === post.authorId);
+ let finalPost ={
+   ...post,
+   authorName : utenti[0].name,
+   authorSurname : utenti[0].surname,
+   authorAlias : utenti[0].bio.alias,
+   authorPhoto : utenti[0].photo,
+   comments: post.comments.map((comment) => {
+    const newUser = users.filter((user) => comment.authorId === user.id);
+    comment = {
+      ...comment,
+      authorName: newUser[0].name,
+      authorSurname: newUser[0].surname,
+      authorPhoto: newUser[0].photo,
+       
+    };
+    return comment;
+  }),
+  likes: post.likes.map((like) => {
+    const newUser = users.filter((user) => like === user.id);
+    newLike = {
+      authorId: like,
+      authorName: newUser[0].name,
+      authorSurname: newUser[0].surname,
+      authorPhoto: newUser[0].photo,
+    };
+    return newLike;
+  }),
+ }
+ 
+ res.send(finalPost);
+ });
+  /* -----------------------------------------------------/GET SINGLE POST---------------------------------------------------------------------- */
+
+
+  /* -----------------------------------------------------SINGLE POST PATCH---------------------------------------------------------------------- */
+router.patch("/posts/:id", async (req, res) => {
+  const postId = req.params["id"];
+  const update = { $set: req.body };
+  const filter = { id: postId };
+  const ris = await postsCollection.updateOne(filter, update);
+
+  res.send([{response:`post id:${postId} updated`}]);
+});
+  /* -----------------------------------------------------/SINGLE POST PATCH---------------------------------------------------------------------- */
+
+
+
+  /* -----------------------------------------------------SINGLE POST DELETE---------------------------------------------------------------------- */
+router.delete("/posts/:id", async (req, res) => {
+  const postId = req.params["id"];
+  const ris = await postsCollection.deleteOne({ id: postId });
+  res.status(200).send([{response:`post id:${postId} removed`}]);
+});
+  /* -----------------------------------------------------/SINGLE POST DELETE---------------------------------------------------------------------- */
+
+
+  /* -----------------------------------------------------GET MY POST---------------------------------------------------------------------- */
 router.post("/getmypost", async (req, res) => {
   newReq = req.body;
 
@@ -75,41 +167,12 @@ router.post("/getmypost", async (req, res) => {
 
   res.send(finalResult);
 });
+  /* -----------------------------------------------------/GET MY POST---------------------------------------------------------------------- */
 
-router.get("/posts/:id", async (req, res) => {
-  const postId = req.params["id"];
-  let post = await postsCollection.findOne({ id: postId });
 
-  res.send(post);
-});
-router.post("/posts", async (req, res) => {
-  const newPostId = Date.now().toString();
-  newReq = req.body;
-  let newObject = { id: newPostId, ...newReq };
-  const ris = await postsCollection.insertOne(newObject);
 
-  if (ris.acknowledged) {
-    res.status(200).send(newPostId);
-  }
-});
-
-router.patch("/posts/:id", async (req, res) => {
-  const postId = req.params["id"];
-  const update = { $set: req.body };
-  const filter = { id: postId };
-  const ris = await postsCollection.updateOne(filter, update);
-
-  res.send([{response:`post id:${postId} updated`}]);
-});
-router.delete("/posts/:id", async (req, res) => {
-  const postId = req.params["id"];
-  const ris = await postsCollection.deleteOne({ id: postId });
-  res.status(200).send([{response:`post id:${postId} removed`}]);
-});
-
-router.post("/like", async (req, res) => {
-
-  
+  /* -----------------------------------------------------POSTS LIKE---------------------------------------------------------------------- */
+router.post("/like", async (req, res) => {  
   action = req.body;
 
   if (action.type === "like") {
@@ -156,6 +219,14 @@ router.post("/like", async (req, res) => {
     res.send([{response:`post id:${postId} updated`}]);
   }
 });
+
+
+
+  /* -----------------------------------------------------/POSTS LIKE---------------------------------------------------------------------- */
+
+
+
+  /* -----------------------------------------------------POSTS COMMENTS---------------------------------------------------------------------- */
 router.post("/comments", async (req, res) => {
   newReq = req.body;
   postId = newReq.postId;
@@ -195,6 +266,14 @@ router.post("/comments", async (req, res) => {
   await usersCollection.updateOne(filterUser, updateUser);
   res.send([{response:`user id:${postId} updated`}]);
 });
+
+/* -----------------------------------------------------/POSTS COMMENTS---------------------------------------------------------------------- */
+
+
+
+
+
+/* -----------------------------------------------------CONNECTIONS---------------------------------------------------------------------- */
 
 async function run1() {
   await mongoClient.connect();
