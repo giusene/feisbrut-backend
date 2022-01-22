@@ -198,10 +198,10 @@ router.post("/like", async (req, res) => {
         ],
       },
     };
+    const ris = await postsCollection.updateOne(filterPost, updatePost);
     if(post.authorId !== user.id ){
 
-      const ris = await postsCollection.updateOne(filterPost, updatePost);
-      usersCollection.updateOne(filterUser, updateUser);
+      const ris2 = usersCollection.updateOne(filterUser, updateUser);
   
       res.send([{response:`post id:${postId} updated and notification send`}]);
     } else {res.send([{response:`post id:${postId} updated and notification unsend`}]);}
@@ -265,10 +265,10 @@ router.post("/comments", async (req, res) => {
     },
   };
 
+  const ris = await postsCollection.updateOne(filter, update);
   if(post.authorId !== user.id ){
 
-    const ris = await postsCollection.updateOne(filter, update);
-    usersCollection.updateOne(filterUser, updateUser);
+    const ris2 = usersCollection.updateOne(filterUser, updateUser);
 
     res.send([{response:`post id:${postId} updated and notification send`}]);
   } else {res.send([{response:`post id:${postId} updated and notification unsend `}]);}
