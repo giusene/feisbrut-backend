@@ -93,6 +93,7 @@ router.post("/login", async (req, res) => {
         surname: friend.surname,
         photo: friend.photo,
         id: friend.id,
+        login_time: friend.login_time
       });
     });
     let myFriendsReq = [];
@@ -206,9 +207,28 @@ router.post('/checksession',async (req,res) =>{
     const update = { $set: {login_time:timeNow,user_token:token,logged:true }};
     const filter = { id: newReq.userId };
     const ris = await usersCollection.updateOne(filter, update);
+    let newUser = await usersCollection.findOne({ id: newReq.userId });
+    userResponse = {
+      id: newUser.id,
+      name: newUser.name,
+      surname: newUser.surname,
+      email: newUser.email,
+      photo: newUser.photo,
+      friends: newUser.friends,
+      bio: newUser.bio,
+      friendreq: newUser.friendreq,
+      friendrec: newUser.friendrec,
+      messages: newUser.messages,
+      confirmed: newUser.confirmed,
+      notify: newUser.notify,
+      login_time:  newUser.login_time,
+      user_token: newUser.user_token,
+      logged:newUser.logged,
+      checkSession:newUser.checkSession
+    }
      
-    res.send([{resp:"Utente Confermato",verified:true}])
-  } else if(newReq.user_token === user.user_token && !user.checkSession){
+    res.send(userResponse)
+  } else if(newReq.user_token === user.user_token && !user.checkSession && newReq.logged){
 
     let token= randomString(32, '#aA')
     let timeNow =  Date.now()
@@ -216,8 +236,31 @@ router.post('/checksession',async (req,res) =>{
     const filter = { id: newReq.userId };
     const ris = await usersCollection.updateOne(filter, update);
 
+    let newUser = await usersCollection.findOne({ id: newReq.userId });
+    userResponse = {
+      id: newUser.id,
+      name: newUser.name,
+      surname: newUser.surname,
+      email: newUser.email,
+      photo: newUser.photo,
+      friends: newUser.friends,
+      bio: newUser.bio,
+      friendreq: newUser.friendreq,
+      friendrec: newUser.friendrec,
+      messages: newUser.messages,
+      confirmed: newUser.confirmed,
+      notify: newUser.notify,
+      login_time:  newUser.login_time,
+      user_token: newUser.user_token,
+      logged:newUser.logged,
+      checkSession:newUser.checkSession
+    }
+    res.send(userResponse)
   } else{
-    res.send([{resp:"Utente Non Confermato",verified:false}])
+    const update = { $set: {logged:false }};
+    const filter = { id: newReq.userId };
+    const ris = await usersCollection.updateOne(filter, update);
+    res.send({logged:false})
   }
    
    
