@@ -199,7 +199,7 @@ router.post("/like", async (req, res) => {
       },
     };
     const ris = await postsCollection.updateOne(filterPost, updatePost);
-    if(post.authorId !== user.id ){
+    if(action.userId !== user.id ){
 
       const ris2 = usersCollection.updateOne(filterUser, updateUser);
   
@@ -266,7 +266,7 @@ router.post("/comments", async (req, res) => {
   };
 
   const ris = await postsCollection.updateOne(filter, update);
-  if(post.authorId !== user.id ){
+  if(action.userId !== user.id  ){
 
     const ris2 = usersCollection.updateOne(filterUser, updateUser);
 
