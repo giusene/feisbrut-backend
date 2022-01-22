@@ -563,7 +563,7 @@ router.post("/searchbar", async (req, res) => {
   });
  
 
-  const filtered = data.filter((user) => user.id !== newReq.author_id);
+  const filtered = data.filter((user) => user.id !== newReq.author_id && user.confirmed);
   const finalUser = [];
   filtered.filter(
     (user) =>

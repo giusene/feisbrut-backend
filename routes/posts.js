@@ -198,10 +198,13 @@ router.post("/like", async (req, res) => {
         ],
       },
     };
-    const ris = await postsCollection.updateOne(filterPost, updatePost);
-    usersCollection.updateOne(filterUser, updateUser);
+    if(post.authorId !== user.id ){
 
-    res.send([{response:`post id:${postId} updated`}]);
+      const ris = await postsCollection.updateOne(filterPost, updatePost);
+      usersCollection.updateOne(filterUser, updateUser);
+  
+      res.send([{response:`post id:${postId} updated and notification send`}]);
+    } else {res.send([{response:`post id:${postId} updated and notification unsend`}]);}
   } else if (action.type === "dislike") {
     const postId = action.postId;
     let post = await postsCollection.findOne({ id: postId });
@@ -262,9 +265,13 @@ router.post("/comments", async (req, res) => {
     },
   };
 
-  const ris = await postsCollection.updateOne(filter, update);
-  await usersCollection.updateOne(filterUser, updateUser);
-  res.send([{response:`user id:${postId} updated`}]);
+  if(post.authorId !== user.id ){
+
+    const ris = await postsCollection.updateOne(filter, update);
+    usersCollection.updateOne(filterUser, updateUser);
+
+    res.send([{response:`post id:${postId} updated and notification send`}]);
+  } else {res.send([{response:`post id:${postId} updated and notification unsend `}]);}
 });
 
 /* -----------------------------------------------------/POSTS COMMENTS---------------------------------------------------------------------- */
