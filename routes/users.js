@@ -229,7 +229,7 @@ router.post("/checksession", async (req, res) => {
       user_token: newUser.user_token,
       logged: newUser.logged,
       checkSession: newUser.checkSession,
-      db_id: user._id
+      db_id: newUser._id
     };
 
     res.send(userResponse);
@@ -638,6 +638,7 @@ router.post("/searchbar", async (req, res) => {
     
     const shuffled = filtered.sort(() => 0.5 - Math.random());
     let selected = shuffled.slice(0, 4);
+    console.log(selected)
     
     if(selected.length > 0){
 
