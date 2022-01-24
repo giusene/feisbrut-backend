@@ -645,7 +645,7 @@ router.post("/searchbar", async (req, res) => {
  /* -----------------------------------------------------/RANDOMUSER---------------------------------------------------------------------- */
 
 
-
+ /* -----------------------------------------------------MESSAGES---------------------------------------------------------------------- */
  router.post("/instantmessage", async (req,res)=>{
 
   action = req.body;
@@ -678,7 +678,7 @@ router.post("/searchbar", async (req, res) => {
   } else {
     
     const filterMe = { id: action.my_id };
-    updateMe = {$set :{ messages:{[myDestination]:[{author:friendDestination,date:new Date().toISOString(),text:action.text,read:false}]}}};
+    updateMe = {$set :{ messages:{...me.messages,[myDestination]:[{author:friendDestination,date:new Date().toISOString(),text:action.text,read:false}]}}};
   
     const filterFriend = { id: action.friend_id };
     updateFriend = {$set :{ messages:{...friend.messages,[friendDestination]:[{author:friendDestination,date:new Date().toISOString,text:action.text,read:false}]}}};
@@ -700,7 +700,37 @@ router.post("/searchbar", async (req, res) => {
 
  })
 
+ /* -----------------------------------------------------/MESSAGES---------------------------------------------------------------------- */
 
+
+ router.post('/readmessages', async (req,res) =>{
+  action = req.body;
+  const user = await usersCollection.findOne({ id: action.my_id });
+
+  let myDestination = action.friend_id;
+  let friendDestination = action.my_id;
+  if(user.messages[myDestination]){
+    let read = []
+    user.messages[myDestination].map(element => element.author === action.friend_id && read.push({...element,read:true} ))
+    user.messages[myDestination].map(element => element.author !== action.friend_id && read.push({...element} ))
+
+
+
+    const filterMe = { id: action.my_id };
+    updateMe = {$set :{ messages:{[myDestination]:read}}};
+  
+    const filterFriend = { id: action.friend_id };
+    updateFriend = {$set :{ messages:{[friendDestination]:read}}};
+  
+  
+    const risMe = await usersCollection.updateOne(filterMe, updateMe);
+    const risFriend = await usersCollection.updateOne(filterFriend, updateFriend);
+    
+    res.send([{response:"update effettuato correttamente"}])
+  } else {res.send([{response:"nessuna chat trovata"}])}
+  
+
+ })
 
   /* -----------------------------------------------------CONNECTIONS---------------------------------------------------------------------- */
 
