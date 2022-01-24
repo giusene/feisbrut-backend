@@ -166,6 +166,7 @@ router.post("/login", async (req, res) => {
         user_token: finalUser.user_token,
         logged: finalUser.logged,
         checkSession: finalUser.checkSession,
+        db_id: user._id
       });
     });
 
@@ -191,13 +192,13 @@ router.post("/checksession", async (req, res) => {
   }
 
   newReq = req.body;
-  let user = await usersCollection.findOne({ id: newReq.userId });
+  let user = await usersCollection.findOne({ _id: newReq.db_id });
   let now = Date.now() / 60000;
   let lastLogin = newReq.login_time / 60000;
   if (
     newReq.logged &&
     now - lastLogin < 20 &&
-    newReq.user_token === user.user_token
+    newReq.user_token === user.user_token 
   ) {
     let token = randomString(32, "#aA");
     let timeNow = Date.now();
@@ -224,6 +225,7 @@ router.post("/checksession", async (req, res) => {
       user_token: newUser.user_token,
       logged: newUser.logged,
       checkSession: newUser.checkSession,
+      db_id: user._id
     };
 
     res.send(userResponse);
