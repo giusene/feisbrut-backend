@@ -705,22 +705,23 @@ router.post("/searchbar", async (req, res) => {
 
  router.post('/readmessages', async (req,res) =>{
   action = req.body;
-  const user = await usersCollection.findOne({ id: action.my_id });
+  const me = await usersCollection.findOne({ id: action.my_id });
+  const friend = await usersCollection.findOne({ id: action.friend_id });
 
   let myDestination = action.friend_id;
   let friendDestination = action.my_id;
-  if(user.messages[myDestination]){
+  if(me.messages[myDestination]){
     let read = []
-    user.messages[myDestination].map(element => element.author === action.friend_id && read.push({...element,read:true} ))
-    user.messages[myDestination].map(element => element.author !== action.friend_id && read.push({...element} ))
+    me.messages[myDestination].map(element => element.author === action.friend_id && read.push({...element,read:true} ))
+    me.messages[myDestination].map(element => element.author !== action.friend_id && read.push({...element} ))
 
 
 
     const filterMe = { id: action.my_id };
-    updateMe = {$set :{ messages:{[myDestination]:read}}};
+    updateMe = {$set :{ messages:{...me.messages,[myDestination]:read}}};
   
     const filterFriend = { id: action.friend_id };
-    updateFriend = {$set :{ messages:{[friendDestination]:read}}};
+    updateFriend = {$set :{ messages:{...friend.messages,[friendDestination]:read}}};
   
   
     const risMe = await usersCollection.updateOne(filterMe, updateMe);
