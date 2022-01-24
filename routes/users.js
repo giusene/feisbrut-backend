@@ -611,11 +611,11 @@ router.post("/searchbar", async (req, res) => {
 
  /* -----------------------------------------------------RANDOMUSER---------------------------------------------------------------------- */
  router.post('/randomusers', async (req,res)=>{
-   newReq = req.body;
-   let data =[];
-
-  const cursor = usersCollection.find({});
-  await cursor.forEach((user) => {
+    newReq = req.body;
+    let data =[];
+    const me = await usersCollection.findOne({ id: newReq.userId });
+    const cursor = usersCollection.find({});
+    await cursor.forEach((user) => {
     user = {
       id: user.id,      
       name: user.name,
@@ -629,7 +629,10 @@ router.post("/searchbar", async (req, res) => {
     data.push(user);
   });
     let filtered=[]
-    newReq.friends.map(friend =>  filtered = data.filter(user => user.id !== newReq.userId && user.id !== friend && user.confirmed));
+    if(me.friends.length > 0){
+      me.friends.map(friend =>  filtered = data.filter(user => user.id !== newReq.userId && user.id !== friend && user.confirmed));
+    } else {filtered = data.filter(user => user.id !== newReq.userId && user.confirmed)}
+    
     
     
     
@@ -639,7 +642,7 @@ router.post("/searchbar", async (req, res) => {
     if(selected.length > 0){
 
       res.send(selected)
-    } else {res.send([{response:'nessun utente trovato'}])}
+    } else {res.send([])}
 
  })
  /* -----------------------------------------------------/RANDOMUSER---------------------------------------------------------------------- */
