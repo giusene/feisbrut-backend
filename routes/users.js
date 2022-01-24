@@ -234,8 +234,8 @@ router.post("/checksession", async (req, res) => {
 
     res.send(userResponse);
   } else if (
-    newReq.user_token === user.user_token &&
-    !user.checkSession &&
+    newReq.user_token === newUser.user_token &&
+    !newUser.checkSession &&
     newReq.logged
   ) {
     let token = randomString(32, "#aA");
