@@ -196,7 +196,7 @@ router.post("/checksession", async (req, res) => {
   }
 
   newReq = req.body;
-  let user = await usersCollection.findOne({ _id: newReq.db_id });
+  let user = await usersCollection.findOne({ id: newReq.userId });
   let now = Date.now() / 60000;
   let lastLogin = newReq.login_time / 60000;
   if (
