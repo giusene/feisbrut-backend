@@ -343,6 +343,7 @@ router.get("/users/:id", async (req, res) => {
     friends: [...myFinalFriends],
     bio: user.bio,
     confirmed: user.confirmed,
+    login_time:user.login_time
   };
   res.send(user);
 });
@@ -479,6 +480,7 @@ router.post("/getfriends", async (req, res) => {
       friends: user.friends,
       bio: user.bio,
       cover: user.cover,
+      login_time: user.login_time
     };
     data.push(user);
   });
@@ -551,15 +553,33 @@ router.post("/searchbar", async (req, res) => {
   let query = newReq.text.replace(/\s/g, "");
   const cursor = usersCollection.find({});
   await cursor.forEach((user) => {
+    let myFriends = [];
+        let iteration = [...user.friends].map((friendsId) =>
+          [...data].filter((friend) => friend.id === friendsId)
+        );
+        iteration.map((user) => {
+          user.map((friend) => myFriends.push(friend));
+        });
+        let myFinalFriends = myFriends.map((friend) => {
+          return (friend = {
+            name: friend.name,
+            surname: friend.surname,
+            photo: friend.photo,
+            id: friend.id,
+            login_time: friend.login_time,
+          });
+        });
     user = {
       id: user.id,
       queryName: user.name + user.surname,
       name: user.name,
       surname: user.surname,
       photo: user.photo,
-      friends: user.friends,
+      friends: [...myFinalFriends],
       bio: user.bio,
       cover: user.cover,
+      confirmed: user.confirmed,
+      login_time: user.login_time
     };
     data.push(user);
   });
