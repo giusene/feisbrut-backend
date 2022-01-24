@@ -646,6 +646,62 @@ router.post("/searchbar", async (req, res) => {
 
 
 
+ router.post("/instantmessage", async (req,res)=>{
+
+  action = req.body;
+  const me = await usersCollection.findOne({ id: action.my_id });
+  const friend = await usersCollection.findOne({ id: action.friend_id });
+  let myDestination = friend.id
+  let friendDestination = me.id
+  
+  if(me.messages[myDestination]){
+    let myMessages = [];
+    me.messages[myDestination].map(element=>myMessages.push(element))
+    let myNewMessage = {
+      author:action.my_id,
+      text:action.text,
+      read:false,
+      date: new Date().toISOString()
+    }
+    myMessages.push(myNewMessage)
+
+    const filterMe = { id: action.my_id };
+    updateMe = {$set :{ messages:{[myDestination]:myMessages}}};
+  
+    const filterFriend = { id: action.friend_id };
+    updateFriend = {$set :{ messages:{...friend.messages,[friendDestination]:myMessages}}};
+  
+  
+    const risMe = await usersCollection.updateOne(filterMe, updateMe);
+    const risFriend = await usersCollection.updateOne(filterFriend, updateFriend);
+    console.log("esiste")
+  } else {
+    
+    const filterMe = { id: action.my_id };
+    updateMe = {$set :{ messages:{[myDestination]:[{author:friendDestination,date:new Date().toISOString(),text:action.text,read:false}]}}};
+  
+    const filterFriend = { id: action.friend_id };
+    updateFriend = {$set :{ messages:{...friend.messages,[friendDestination]:[{author:friendDestination,date:new Date().toISOString,text:action.text,read:false}]}}};
+  
+  
+    const risMe = await usersCollection.updateOne(filterMe, updateMe);
+    const risFriend = await usersCollection.updateOne(filterFriend, updateFriend);
+    console.log("non esiste")
+  }
+  
+  
+  
+  
+
+  
+  const finalMe = await usersCollection.findOne({ id: action.my_id });
+  const finalFriend = await usersCollection.findOne({ id: action.friend_id });
+  res.send({me: finalMe, friend:finalFriend})
+
+ })
+
+
+
   /* -----------------------------------------------------CONNECTIONS---------------------------------------------------------------------- */
 
 async function run() {
