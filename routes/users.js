@@ -171,8 +171,12 @@ router.post("/login", async (req, res) => {
     });
 
     res.send(finalResult);
+  } else if(user.email === newReq.email &&
+    user.password === newReq.password &&
+    user.confirmed){
+      res.send([{ response: "Utente non registrato" }]);
   } else {
-    res.send([{ response: "Utente non trovato" }]);
+      res.send([{ response: "Utente non trovato" }]);
   }
 });
 
@@ -383,6 +387,7 @@ router.post("/sendfriendrequest", async (req, res) => {
           who: `${myId}`,
           date: new Date().toISOString(),
           read: false,
+          notify_id:Date.now().toString()
         },
       ],
     },
@@ -427,6 +432,7 @@ router.post("/confirmfriendrequest", async (req, res) => {
           who: `${myId}`,
           date: new Date().toISOString(),
           read: false,
+          notify_id:Date.now().toString()
         },
       ],
     },
@@ -530,7 +536,7 @@ router.post("/notificationmanager", async (req, res) => {
           { $pull: { notify: { notify_id: not } } }
         )
     );
-    final.map(
+    final.map (
       async (not) =>
         await usersCollection.updateOne(
           { id: newReq.userId },
