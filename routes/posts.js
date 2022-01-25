@@ -68,7 +68,7 @@ router.post("/posts", async (req, res) => {
       authorName: newUser[0].name,
       authorSurname: newUser[0].surname,
       authorPhoto: newUser[0].photo,
-       
+      authorAlias : newUser[0].bio.alias,
     };
     return comment;
   }),
@@ -79,6 +79,7 @@ router.post("/posts", async (req, res) => {
       authorName: newUser[0].name,
       authorSurname: newUser[0].surname,
       authorPhoto: newUser[0].photo,
+      authorAlias : newUser[0].bio.alias,
     };
     return newLike;
   }),
@@ -147,6 +148,7 @@ router.post("/getmypost", async (req, res) => {
           authorName: newUser[0].name,
           authorSurname: newUser[0].surname,
           authorPhoto: newUser[0].photo,
+          authorAlias:newUser[0].bio.alias
            
         };
         return comment;
@@ -158,6 +160,7 @@ router.post("/getmypost", async (req, res) => {
           authorName: newUser[0].name,
           authorSurname: newUser[0].surname,
           authorPhoto: newUser[0].photo,
+          authorAlias:newUser[0].bio.alias
         };
         return newLike;
       }),
