@@ -915,7 +915,7 @@ router.post("/searchbar", async (req, res) => {
 
  /* -----------------------------------------------------/MESSAGES---------------------------------------------------------------------- */
 
-
+ /* -----------------------------------------------------READ MESSAGES---------------------------------------------------------------------- */
  router.post('/readmessages', async (req,res) =>{
   action = req.body;
   const me = await usersCollection.findOne({ id: action.my_id });
@@ -945,6 +945,20 @@ router.post("/searchbar", async (req, res) => {
   
 
  })
+
+  /* -----------------------------------------------------/READ MESSAGES---------------------------------------------------------------------- */
+
+  router.post('/deletemessages', async (req,res)=> {
+    newReq= req.body;
+
+    const user = await usersCollection.findOne({ id: newReq.userId });
+    let myMessages=  user.messages;
+    newReq.chatId.map(element => delete myMessages[element]);
+    
+    const risMe = await usersCollection.updateOne({id:newReq.userId}, {$set:{messages:myMessages}});
+    res.send([{response:'chat eliminata con successo'}]);
+
+  })
 
   /* -----------------------------------------------------CONNECTIONS---------------------------------------------------------------------- */
 
