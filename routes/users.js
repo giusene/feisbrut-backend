@@ -977,33 +977,25 @@ router.post("/readmessages", async (req, res) => {
   action = req.body;
   const me = await usersCollection.findOne({ id: action.my_id });
   const friend = await usersCollection.findOne({ id: action.friend_id });
-
   let myDestination = action.friend_id;
   let friendDestination = action.my_id;
-  if (me.messages[myDestination]) {
-    let read = [];
-    me.messages[myDestination].map(
-      (element) =>
-        element.author === action.friend_id &&
-        read.push({ ...element, read: true })
-    );
-    me.messages[myDestination].map(
-      (element) =>
-        element.author !== action.friend_id && read.push({ ...element })
-    );
+ if(me.messages[myDestination]){
 
-    const filterMe = { id: action.my_id };
-    updateMe = {
-      $set: { messages: { ...me.messages, [myDestination]: read } },
-    };    
-
-    const risMe = await usersCollection.updateOne(filterMe, updateMe);
-    
-
-    res.send([{ response: "update effettuato correttamente" }]);
-  } else {
-    res.send([{ response: "nessuna chat trovata" }]);
-  }
+   
+     let read = me.messages[myDestination].map((element) =>({...element,read:true})
+     );
+     
+ 
+     const filterMe = { id: action.my_id };
+     updateMe = {
+       $set: { messages: { ...me.messages, [myDestination]: read } },
+     };    
+ 
+     const risMe = await usersCollection.updateOne(filterMe, updateMe);
+     
+     console.log(read)
+     res.send([{ response: "update effettuato correttamente" }]);  
+ } else {res.send([{ response: "chat non trovata" }])}
 });
 
 /* -----------------------------------------------------/READ MESSAGES---------------------------------------------------------------------- */
