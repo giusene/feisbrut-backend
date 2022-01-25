@@ -853,7 +853,7 @@ router.post("/instantmessage", async (req, res) => {
   let friendDestination = me.id;
 
   if (me.messages[myDestination]) {
-    let myMessageForMe = [];
+    
     
     let myNewMessageForMe = {
       author: action.my_id,
@@ -862,12 +862,12 @@ router.post("/instantmessage", async (req, res) => {
       date: new Date().toISOString(),
     };
 
-    myMessageForMe.push(myNewMessageForMe);
+    
 
     const filterMe = { id: action.my_id };
 
 
-   let finalMessage = { ...me.messages, [myDestination]:[...me.messages[myDestination], ...myMessageForMe ]} 
+   let finalMessage = { ...me.messages, [myDestination]:[...me.messages[myDestination],myNewMessageForMe ]} 
     updateMe = {
       $set: { messages: finalMessage},
     };
@@ -913,7 +913,7 @@ router.post("/instantmessage", async (req, res) => {
   if (friend.messages[friendDestination]) {
 
 
-    let myMessages = [];
+    
 
     
     let myNewMessage = {
@@ -923,9 +923,9 @@ router.post("/instantmessage", async (req, res) => {
       date: new Date().toISOString(),
     };
 
-    myMessages.push(myNewMessage);
     
-    let finalMessage = { ...friend.messages, [friendDestination]:[...friend.messages[friendDestination],...myMessages] };
+    
+    let finalMessage = { ...friend.messages, [friendDestination]:[...friend.messages[friendDestination],myNewMessage] };
     const filterFriend = { id: action.friend_id };
     updateFriend = {
       $set: {messages: finalMessage},
