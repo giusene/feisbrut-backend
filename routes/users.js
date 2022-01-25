@@ -852,7 +852,7 @@ router.post("/instantmessage", async (req, res) => {
   let myDestination = friend.id;
   let friendDestination = me.id;
 
-  if (me.messages[myDestination] && friend.messages[friendDestination] ) {
+  if (me.messages[myDestination]) {
     let myMessageForMe = [];
 
     me.messages[myDestination].map((element) => myMessageForMe.push(element));
@@ -869,56 +869,14 @@ router.post("/instantmessage", async (req, res) => {
     updateMe = {
       $set: { messages: { ...me.messages, [myDestination]: myMessageForMe } },
     };
-
-    let myMessages = [];
-
-    friend.messages[friendDestination].map((element) =>
-      myMessages.push(element)
-    );
-    let myNewMessage = {
-      author: action.my_id,
-      text: action.text,
-      read: false,
-      date: new Date().toISOString(),
-    };
-
-    myMessages.push(myNewMessage);
-
-    const filterFriend = { id: action.friend_id };
-    updateFriend = {
-      $set: {
-        messages: { ...friend.messages, [friendDestination]: myMessages },
-      },
-    };
-
-    const risFriend = await usersCollection.updateOne(
-      filterFriend,
-      updateFriend
-    );
+    
 
     const risMe = await usersCollection.updateOne(filterMe, updateMe);
-    console.log("esiste per me e per l'amico");
-  } else if (friend.messages[friendDestination] && !me.messages[myDestination]) {
-    let myMessages = [];
+    console.log("esiste per me");
 
-    friend.messages[friendDestination].map((element) =>
-      myMessages.push(element)
-    );
-    let myNewMessage = {
-      author: action.my_id,
-      text: action.text,
-      read: false,
-      date: new Date().toISOString(),
-    };
 
-    myMessages.push(myNewMessage);
+  }else if (!me.messages[myDestination]) {
 
-    const filterFriend = { id: action.friend_id };
-    updateFriend = {
-      $set: {
-        messages: { ...friend.messages, [friendDestination]: myMessages },
-      },
-    };
     const filterMe = { id: action.my_id };
     updateMe = {
       $set: {
@@ -935,33 +893,56 @@ router.post("/instantmessage", async (req, res) => {
         },
       },
     };
+    
+    
     const risMe = await usersCollection.updateOne(filterMe, updateMe);
+   
+    console.log("non esiste per me");
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  if (friend.messages[friendDestination]) {
+
+
+    let myMessages = [];
+
+    friend.messages[friendDestination].map((element) =>
+      myMessages.push(element)
+    );
+    let myNewMessage = {
+      author: action.my_id,
+      text: action.text,
+      read: false,
+      date: new Date().toISOString(),
+    };
+
+    myMessages.push(myNewMessage);
+
+    const filterFriend = { id: action.friend_id };
+    updateFriend = {
+      $set: {
+        messages: { ...friend.messages, [friendDestination]: myMessages },
+      },
+    };
+    
 
 
     const risFriend = await usersCollection.updateOne(
       filterFriend,
       updateFriend
     );
-    console.log("esiste per l'amico ma non per me");
-  } else if (me.messages[myDestination] && !friend.messages[friendDestination] ) {
+    console.log("esiste per l'amico");
 
-    let myMessageForMe = [];
 
-    me.messages[myDestination].map((element) => myMessageForMe.push(element));
-    let myNewMessageForMe = {
-      author: action.my_id,
-      text: action.text,
-      read: true,
-      date: new Date().toISOString(),
-    };
-
-    myMessageForMe.push(myNewMessageForMe);
-
-    const filterMe = { id: action.my_id };
-    updateMe = {
-      $set: { messages: { ...me.messages, [myDestination]: myMessageForMe } },
-    };
-
+  } else if (!friend.messages[friendDestination] ) {
+    
     const filterFriend = { id: action.friend_id };
     updateFriend = {
       $set: {
@@ -980,68 +961,10 @@ router.post("/instantmessage", async (req, res) => {
     };
 
     const risFriend = await usersCollection.updateOne(filterFriend,updateFriend);
-    const risMe = await usersCollection.updateOne(filterMe, updateMe);
-    /* const filterMe = { id: action.my_id };
-    updateMe = {
-      $set: {
-        messages: {
-          ...me.messages,
-          [myDestination]: [
-            {
-              author: friendDestination,
-              date: new Date().toISOString(),
-              text: action.text,
-              read: true,
-            },
-          ],
-        },
-      },
-    };
-    const risMe = await usersCollection.updateOne(filterMe, updateMe); */
-
-    console.log("esiste per me ma non per l'amico");
-  } else if (!friend.messages[friendDestination] && !me.messages[myDestination]) {
-
-    const filterMe = { id: action.my_id };
-    updateMe = {
-      $set: {
-        messages: {
-          ...me.messages,
-          [myDestination]: [
-            {
-              author: friendDestination,
-              date: new Date().toISOString(),
-              text: action.text,
-              read: true,
-            },
-          ],
-        },
-      },
-    };
-    const filterFriend = { id: action.friend_id };
-    updateFriend = {
-      $set: {
-        messages: {
-          ...friend.messages,
-          [friendDestination]: [
-            {
-              author: friendDestination,
-              date: new Date().toISOString(),
-              text: action.text,
-              read: false,
-            },
-          ],
-        },
-      },
-    };
     
-    const risMe = await usersCollection.updateOne(filterMe, updateMe);
-    const risFriend = await usersCollection.updateOne(
-      filterFriend,
-      updateFriend
-    );
-    console.log("non esiste per entrambi");
-  }
+
+    console.log("non esiste per l'amico");
+  } 
 
   const finalMe = await usersCollection.findOne({ id: action.my_id });
   const finalFriend = await usersCollection.findOne({ id: action.friend_id });
