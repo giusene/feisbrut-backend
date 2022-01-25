@@ -90,6 +90,7 @@ router.post("/login", async (req, res) => {
           photo: friend.photo,
           id: friend.id,
           login_time: friend.login_time,
+          bio:friend.bio
         });
       });
       let myFriendsReq = [];
@@ -229,6 +230,7 @@ router.post("/checksession", async (req, res) => {
             surname: friend.surname,
             photo: friend.photo,
             id: friend.id,
+            bio:friend.bio
           };
           friendsNot.push(newFriend);
         }
@@ -555,6 +557,7 @@ router.get("/users/:id", async (req, res) => {
       surname: friend.surname,
       photo: friend.photo,
       id: friend.id,
+      bio:friend.bio
     });
   });
 
@@ -769,6 +772,7 @@ router.post("/searchbar", async (req, res) => {
             photo: friend.photo,
             id: friend.id,
             login_time: friend.login_time,
+            bio:friend.bio
           });
         });
     user = {
