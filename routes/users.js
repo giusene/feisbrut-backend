@@ -1073,18 +1073,10 @@ router.post("/readmessages", async (req, res) => {
     const filterMe = { id: action.my_id };
     updateMe = {
       $set: { messages: { ...me.messages, [myDestination]: read } },
-    };
-
-    const filterFriend = { id: action.friend_id };
-    updateFriend = {
-      $set: { messages: { ...friend.messages, [friendDestination]: read } },
-    };
+    };    
 
     const risMe = await usersCollection.updateOne(filterMe, updateMe);
-    const risFriend = await usersCollection.updateOne(
-      filterFriend,
-      updateFriend
-    );
+    
 
     res.send([{ response: "update effettuato correttamente" }]);
   } else {
