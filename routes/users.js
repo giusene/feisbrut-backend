@@ -870,7 +870,7 @@ router.post("/searchbar", async (req, res) => {
     myMessages.push(myNewMessage)
 
     const filterMe = { id: action.my_id };
-    updateMe = {$set :{ messages:{[myDestination]:myMessages}}};
+    updateMe = {$set :{ messages:{...me.messages,[myDestination]:myMessages}}};
   
     const filterFriend = { id: action.friend_id };
     updateFriend = {$set :{ messages:{...friend.messages,[friendDestination]:myMessages}}};
@@ -885,7 +885,7 @@ router.post("/searchbar", async (req, res) => {
     updateMe = {$set :{ messages:{...me.messages,[myDestination]:[{author:friendDestination,date:new Date().toISOString(),text:action.text,read:false}]}}};
   
     const filterFriend = { id: action.friend_id };
-    updateFriend = {$set :{ messages:{...friend.messages,[friendDestination]:[{author:friendDestination,date:new Date().toISOString,text:action.text,read:false}]}}};
+    updateFriend = {$set :{ messages:{...friend.messages,[friendDestination]:[{author:friendDestination,date:new Date().toISOString(),text:action.text,read:false}]}}};
   
   
     const risMe = await usersCollection.updateOne(filterMe, updateMe);
