@@ -184,6 +184,11 @@ router.post("/login", async (req, res) => {
 
 /* -----------------------------------------------------CHECKSESSION---------------------------------------------------------------------- */
 router.post("/checksession", async (req, res) => {
+
+  let data = [];
+  const cursor = usersCollection.find({});
+  await cursor.forEach((user) => data.push(user));
+
   function randomString(length, chars) {
     let mask = "";
     if (chars.indexOf("a") > -1) mask += "abcdefghijklmnopqrstuvwxyz";
@@ -211,20 +216,127 @@ router.post("/checksession", async (req, res) => {
     };
     const filter = { id: newReq.userId };
     const ris = await usersCollection.updateOne(filter, update);
+    
     let newUser = await usersCollection.findOne({ id: newReq.userId });
+
+    let notifyId = newUser.notify.map((not) => not.who);
+    let friendsNot = [];
+    notifyId.forEach((element) =>
+      data.map((friend) => {
+        if (friend.id === element) {
+          let newFriend = {
+            name: friend.name,
+            surname: friend.surname,
+            photo: friend.photo,
+            id: friend.id,
+          };
+          friendsNot.push(newFriend);
+        }
+      })
+    );
+    const ids = friendsNot.map((o) => o.id);
+    const filtered = friendsNot.filter(
+      ({ id }, index) => !ids.includes(id, index + 1)
+    );
+
+
+
+
+      let myFriends = [];
+      let iteration = [...newUser.friends].map((friendsId) =>
+        [...data].filter((friend) => friend.id === friendsId)
+      );
+      iteration.map((user) => {
+        user.map((friend) => myFriends.push(friend));
+      });
+      let myFinalFriends = myFriends.map((friend) => {
+        return (friend = {
+          name: friend.name,
+          surname: friend.surname,
+          photo: friend.photo,
+          id: friend.id,
+          login_time: friend.login_time,
+        });
+    });
+
+
+    let myFriendsReq = [];
+      let iteration2 = [...newUser.friendreq].map((friendsId) =>
+        [...data].filter((friend) => friend.id === friendsId)
+      );
+      iteration2.map((user) => {
+        user.map((friend) => myFriendsReq.push(friend));
+      });
+      let myFinalFriendsReq = myFriendsReq.map((friend) => {
+        return (friend = {
+          name: friend.name,
+          surname: friend.surname,
+          photo: friend.photo,
+          id: friend.id,
+        });
+      });
+
+
+      let myFriendsRec = [];
+      let iteration3 = [...newUser.friendrec].map((friendsId) =>
+        [...data].filter((friend) => friend.id === friendsId)
+      );
+      iteration3.map((user) => {
+        user.map((friend) => myFriendsRec.push(friend));
+      });
+      let myFinalFriendsRec = myFriendsRec.map((friend) => {
+        return (friend = {
+          name: friend.name,
+          surname: friend.surname,
+          photo: friend.photo,
+          id: friend.id,
+        });
+      });
+
+      let myNotify = [];
+      let iteration4 = [...newUser.notify].map((not) => myNotify.push(not));
+      let finalNotify = myNotify.map((not) => {
+        return (newNot = {
+          ...not,
+          user: filtered.filter((friend) => friend.id === not.who),
+        });
+      });
+
+
+
+
+    let newMessages = {};
+      Object.keys(newUser.messages).forEach((single) => {
+        const friendFinder = data.filter((friend) => friend.id === single);
+        newMessages = {
+          ...newMessages,
+          [single]: {
+            discussion: newUser.messages[single],
+            user: {
+              name: friendFinder[0].name,
+              surname: friendFinder[0].surname,
+              photo: friendFinder[0].photo,
+              id: friendFinder[0].id,
+            },
+          },
+        };
+      });
+
+
+    
     userResponse = {
       id: newUser.id,
       name: newUser.name,
       surname: newUser.surname,
       email: newUser.email,
       photo: newUser.photo,
-      friends: newUser.friends,
+      friends: myFinalFriends,
       bio: newUser.bio,
-      friendreq: newUser.friendreq,
-      friendrec: newUser.friendrec,
-      messages: newUser.messages,
+      friendreq: myFinalFriendsReq,
+      friendrec: myFinalFriendsRec,
+      messages: newMessages,
       confirmed: newUser.confirmed,
-      notify: newUser.notify,
+      notify: finalNotify,
       login_time: newUser.login_time,
       user_token: newUser.user_token,
       logged: newUser.logged,
@@ -234,8 +346,8 @@ router.post("/checksession", async (req, res) => {
 
     res.send(userResponse);
   } else if (
-    newReq.user_token === newUser.user_token &&
-    !newUser.checkSession &&
+    newReq.user_token === user.user_token &&
+    !user.checkSession &&
     newReq.logged
   ) {
     let token = randomString(32, "#aA");
@@ -247,24 +359,132 @@ router.post("/checksession", async (req, res) => {
     const ris = await usersCollection.updateOne(filter, update);
 
     let newUser = await usersCollection.findOne({ id: newReq.userId });
+
+    let notifyId = newUser.notify.map((not) => not.who);
+    let friendsNot = [];
+    notifyId.forEach((element) =>
+      data.map((friend) => {
+        if (friend.id === element) {
+          let newFriend = {
+            name: friend.name,
+            surname: friend.surname,
+            photo: friend.photo,
+            id: friend.id,
+          };
+          friendsNot.push(newFriend);
+        }
+      })
+    );
+    const ids = friendsNot.map((o) => o.id);
+    const filtered = friendsNot.filter(
+      ({ id }, index) => !ids.includes(id, index + 1)
+    );
+
+
+
+
+      let myFriends = [];
+      let iteration = [...newUser.friends].map((friendsId) =>
+        [...data].filter((friend) => friend.id === friendsId)
+      );
+      iteration.map((user) => {
+        user.map((friend) => myFriends.push(friend));
+      });
+      let myFinalFriends = myFriends.map((friend) => {
+        return (friend = {
+          name: friend.name,
+          surname: friend.surname,
+          photo: friend.photo,
+          id: friend.id,
+          login_time: friend.login_time,
+        });
+    });
+
+
+    let myFriendsReq = [];
+      let iteration2 = [...newUser.friendreq].map((friendsId) =>
+        [...data].filter((friend) => friend.id === friendsId)
+      );
+      iteration2.map((user) => {
+        user.map((friend) => myFriendsReq.push(friend));
+      });
+      let myFinalFriendsReq = myFriendsReq.map((friend) => {
+        return (friend = {
+          name: friend.name,
+          surname: friend.surname,
+          photo: friend.photo,
+          id: friend.id,
+        });
+      });
+
+
+      let myFriendsRec = [];
+      let iteration3 = [...newUser.friendrec].map((friendsId) =>
+        [...data].filter((friend) => friend.id === friendsId)
+      );
+      iteration3.map((user) => {
+        user.map((friend) => myFriendsRec.push(friend));
+      });
+      let myFinalFriendsRec = myFriendsRec.map((friend) => {
+        return (friend = {
+          name: friend.name,
+          surname: friend.surname,
+          photo: friend.photo,
+          id: friend.id,
+        });
+      });
+
+      let myNotify = [];
+      let iteration4 = [...newUser.notify].map((not) => myNotify.push(not));
+      let finalNotify = myNotify.map((not) => {
+        return (newNot = {
+          ...not,
+          user: filtered.filter((friend) => friend.id === not.who),
+        });
+      });
+
+
+
+
+    let newMessages = {};
+      Object.keys(newUser.messages).forEach((single) => {
+        const friendFinder = data.filter((friend) => friend.id === single);
+        newMessages = {
+          ...newMessages,
+          [single]: {
+            discussion: newUser.messages[single],
+            user: {
+              name: friendFinder[0].name,
+              surname: friendFinder[0].surname,
+              photo: friendFinder[0].photo,
+              id: friendFinder[0].id,
+            },
+          },
+        };
+      });
+
+
+    
     userResponse = {
       id: newUser.id,
       name: newUser.name,
       surname: newUser.surname,
       email: newUser.email,
       photo: newUser.photo,
-      friends: newUser.friends,
+      friends: myFinalFriends,
       bio: newUser.bio,
-      friendreq: newUser.friendreq,
-      friendrec: newUser.friendrec,
-      messages: newUser.messages,
+      friendreq: myFinalFriendsReq,
+      friendrec: myFinalFriendsRec,
+      messages: newMessages,
       confirmed: newUser.confirmed,
-      notify: newUser.notify,
+      notify: finalNotify,
       login_time: newUser.login_time,
       user_token: newUser.user_token,
       logged: newUser.logged,
       checkSession: newUser.checkSession,
+      db_id: newUser._id
     };
+
     res.send(userResponse);
   } else {
     const update = { $set: { logged: false } };
