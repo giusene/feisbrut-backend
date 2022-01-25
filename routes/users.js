@@ -734,37 +734,13 @@ router.post("/notificationmanager", async (req, res) => {
     res.send(response);
   } else if (newReq.type === "patch") {
     const user = await usersCollection.findOne({ id: newReq.userId });
-    let notifications = [];
-    const iteration = newReq.notification_id.map((not) =>
-      user.notify.filter((noti) => {
-        noti.notify_id === not && notifications.push(noti);
-      })
-    );
-    let final = [];
-    notifications.forEach((notification) => {
-      newNotification = {
-        ...notification,
-        read: true,
-      };
-      final.push(newNotification);
-    });
+   
+    let finalResult = []
+    user.notify.map(not=>  finalResult.push({...not,read:true}));    
+    usersCollection.updateOne({ id: newReq.userId },{ $set: { notify:finalResult} })
 
-    newReq.notification_id.map(
-      async (not) =>
-        await usersCollection.updateOne(
-          { id: newReq.userId },
-          { $pull: { notify: { notify_id: not } } }
-        )
-    );
-    final.map (
-      async (not) =>
-        await usersCollection.updateOne(
-          { id: newReq.userId },
-          { $push: { notify: not } }
-        )
-    );
 
-    console.log(final);
+
     const response = [{ response: "notifiche aggiornate con successo" }];
     res.send(response);
   }
