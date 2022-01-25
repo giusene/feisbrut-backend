@@ -859,8 +859,9 @@ router.post("/searchbar", async (req, res) => {
   let friendDestination = me.id
   
   if(me.messages[myDestination]){
+    let myMessageForMe = []
     let myMessages = [];
-    me.messages[myDestination].map(element=>myMessages.push(element))
+    friend.messages[friendDestination].map(element=>myMessages.push(element))
     let myNewMessage = {
       author:action.my_id,
       text:action.text,
@@ -868,9 +869,17 @@ router.post("/searchbar", async (req, res) => {
       date: new Date().toISOString()
     }
     myMessages.push(myNewMessage)
+    me.messages[myDestination].map(element=>myMessageForMe.push(element))
+    let myNewMessageForMe = {
+      author:action.my_id,
+      text:action.text,
+      read:true,
+      date: new Date().toISOString()
+    }
+    myMessageForMe.push(myNewMessageForMe)
 
     const filterMe = { id: action.my_id };
-    updateMe = {$set :{ messages:{...me.messages,[myDestination]:myMessages}}};
+    updateMe = {$set :{ messages:{...me.messages,[myDestination]:myMessageForMe}}};
   
     const filterFriend = { id: action.friend_id };
     updateFriend = {$set :{ messages:{...friend.messages,[friendDestination]:myMessages}}};
@@ -882,7 +891,7 @@ router.post("/searchbar", async (req, res) => {
   } else {
     
     const filterMe = { id: action.my_id };
-    updateMe = {$set :{ messages:{...me.messages,[myDestination]:[{author:friendDestination,date:new Date().toISOString(),text:action.text,read:false}]}}};
+    updateMe = {$set :{ messages:{...me.messages,[myDestination]:[{author:friendDestination,date:new Date().toISOString(),text:action.text,read:true}]}}};
   
     const filterFriend = { id: action.friend_id };
     updateFriend = {$set :{ messages:{...friend.messages,[friendDestination]:[{author:friendDestination,date:new Date().toISOString(),text:action.text,read:false}]}}};
