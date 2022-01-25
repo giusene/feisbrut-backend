@@ -866,12 +866,12 @@ router.post("/instantmessage", async (req, res) => {
 
     const filterMe = { id: action.my_id };
     updateMe = {
-      $set: { messages: { ...me.messages, [myDestination]:[...me.messages[myDestination], myMessageForMe ]}},
+      $set: { messages: { ...me.messages, [myDestination]:[...me.messages[myDestination], ...myMessageForMe ]}},
     };
     
-
     const risMe = await usersCollection.updateOne(filterMe, updateMe);
     console.log("esiste per me");
+    console.log(me.messages[myDestination])
 
 
   }else if (!me.messages[myDestination]) {
@@ -925,7 +925,7 @@ router.post("/instantmessage", async (req, res) => {
     const filterFriend = { id: action.friend_id };
     updateFriend = {
       $set: {
-        messages: { ...friend.messages, [friendDestination]:[...friend.messages[friendDestination], myMessages ]},
+        messages: { ...friend.messages, [friendDestination]:[...friend.messages[friendDestination],...myMessages] },
       },
     };
     
