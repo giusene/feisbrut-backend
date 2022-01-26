@@ -601,7 +601,7 @@ router.patch("/users/:id", async (req, res) => {
   await cursor.forEach((user) => data.push(user));
   let result = data.filter(
     (user) =>
-    user._id.toString()=== newReq._id 
+    user._id.toString() === newReq._id 
     
     );
     
@@ -615,8 +615,9 @@ router.patch("/users/:id", async (req, res) => {
     photo:newReq.photo,
     bio:newReq.bio
   }
+  console.log(newObject)
   const update = { $set: newObject };
-  const filter = { id: userId };
+  const filter = { _id :ObjectId(newReq._id)};
   const ris = await usersCollection.updateOne(filter, update);
   res.send([{ response_: `user id:${userId} updated` }]);
 } else {res.send({response:"accesso non autorizzato"})}
