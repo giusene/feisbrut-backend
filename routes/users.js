@@ -1,5 +1,5 @@
 const express = require("express");
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 const fs = require("fs");
 const router = express.Router();
 const config = require("../config");
@@ -530,9 +530,11 @@ router.post("/users", async (req, res) => {
 /* -----------------------------------------------------USER CONFIRMATION---------------------------------------------------------------------- */
 router.post('/confirmation', async (req,res) =>{
   let newReq = req.body
-  let filter = {_id : newReq.id}
+  /* let filter = {_id : newReq.id}
   let update = {$set : {confirmed:true}}
-  const ris = await usersCollection.updateOne(filter, update);
+  const ris = await usersCollection.updateOne(filter, update);   */
+  let newUser = await usersCollection.findOne({ _id :ObjectId(newReq.id)} );
+  console.log(newUser)
   res.send({response:"utente confermato"})
 })
 
