@@ -177,9 +177,9 @@ router.post("/login", async (req, res) => {
     user.password === newReq.password &&
     user.confirmed
   ) {
-    res.send([{ response: "Utente non registrato" }]);
+    res.send({ response: "Utente non registrato" });
   } else {
-    res.send([{ response: "Utente non trovato" }]);
+    res.send({ response: "Utente non trovato" });
   }
 });
 
