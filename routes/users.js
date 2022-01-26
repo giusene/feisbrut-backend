@@ -601,7 +601,7 @@ router.patch("/users/:id", async (req, res) => {
   await cursor.forEach((user) => data.push(user));
   let result = data.filter(
     (user) =>
-    user._id.toString()=== newReq.id 
+    user._id.toString()=== newReq._id 
     
     );
     
