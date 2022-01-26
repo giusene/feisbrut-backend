@@ -23,6 +23,7 @@ router.post("/login", async (req, res) => {
       user.password === newReq.password 
       
   );
+  console.log(result)
   if (result.length > 0 ) {
 
     if(result[0].confirmed){let newUser = await usersCollection.findOne({ email: newReq.email });
@@ -172,9 +173,9 @@ router.post("/login", async (req, res) => {
       });
     });
 
-    res.send(finalResult);} else{ { response: "Utente non confermato" }}
+    res.send(finalResult);} else{ res.send({ response: "Utente non confermato" })}
   }else {
-    res.send({ response: "Utente non trovato" });
+    res.send({ response: "Nome Utente o Password Errati" });
   }
 });
 
