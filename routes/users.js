@@ -499,11 +499,27 @@ router.get("/users", async (req, res) => {
 router.post("/users", async (req, res) => {
   const newUserId = Date.now().toString();
   newReq = req.body;
-  let newObject = { id: newUserId, ...newReq };
-  const ris = await usersCollection.insertOne(newObject);
 
-  if (ris.acknowledged) {
-    res.status(200).send(newUserId);
+
+
+  let data = [];
+  const cursor = usersCollection.find({});
+  await cursor.forEach((user) => data.push(user));
+  let result = data.filter(
+    (user) =>
+      user.email === newReq.email
+      
+  );
+  if(result.length >0){
+    res.send({response:"indirizzo email già in uso"})
+  } else {
+
+    let newObject = { id: newUserId, ...newReq };
+    const ris = await usersCollection.insertOne(newObject);
+  
+    if (ris.acknowledged) {
+      res.status(200).send(newUserId);
+    }
   }
 });
 
