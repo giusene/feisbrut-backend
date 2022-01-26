@@ -1,5 +1,5 @@
 const express = require("express");
-const { MongoClient, ObjectId } = require("mongodb");
+const { MongoClient, ObjectId, ObjectID } = require("mongodb");
 const fs = require("fs");
 const router = express.Router();
 const config = require("../config");
@@ -530,12 +530,15 @@ router.post("/users", async (req, res) => {
 /* -----------------------------------------------------USER CONFIRMATION---------------------------------------------------------------------- */
 router.post('/confirmation', async (req,res) =>{
   let newReq = req.body
-  let filter = { _id :ObjectId(newReq.id)}
-  let update = {$set : {confirmed:true}}
-  const ris = await usersCollection.updateOne(filter, update);  
-  
-  
-  res.send({response:"utente confermato"})
+  let newUser = await usersCollection.findOne({ id: newUserId });
+  if(!newUser.confirmed){
+    let filter = { _id :ObjectId(newReq.id)}
+    let update = {$set : {confirmed:true}}
+    const ris = await usersCollection.updateOne(filter, update);   
+    
+    res.send({response:"utente confermato"})
+
+  } else {res.send({response:"Link Scaduto"})}
 })
 
 
@@ -598,10 +601,11 @@ router.patch("/users/:id", async (req, res) => {
   await cursor.forEach((user) => data.push(user));
   let result = data.filter(
     (user) =>
-      user._id === newReq._id 
-      
-  );
-
+    user._id.toString()=== newReq.id 
+    
+    );
+    
+    
 
   if(result.length > 0 ){
     newObject ={
