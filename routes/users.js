@@ -532,6 +532,7 @@ router.post('/confirmation', async (req,res) =>{
   let newReq = req.body
   let filter = {_id : newReq.id}
   let update = {$set : {confirmed:true}}
+  const ris = await usersCollection.updateOne(filter, update);
   res.send({response:"utente confermato"})
 })
 
