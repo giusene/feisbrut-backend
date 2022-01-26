@@ -20,8 +20,8 @@ router.post("/login", async (req, res) => {
   let result = data.filter(
     (user) =>
       user.email === newReq.email &&
-      user.password === newReq.password &&
-      user.confirmed
+      user.password === newReq.password 
+      
   );
   if (result.length > 0 ) {
 
