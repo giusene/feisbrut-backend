@@ -607,7 +607,7 @@ router.patch("/users/:id", async (req, res) => {
     
     
 
-  if(result.length > 0 ){
+  if(result){
     newObject ={
     name:newReq.name,
     surname:newReq.surname,
