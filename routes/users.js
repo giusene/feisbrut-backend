@@ -23,8 +23,9 @@ router.post("/login", async (req, res) => {
       user.password === newReq.password &&
       user.confirmed
   );
-  if (result.length > 0) {
-    let newUser = await usersCollection.findOne({ email: newReq.email });
+  if (result.length > 0 ) {
+
+    if(result[0].confirmed){let newUser = await usersCollection.findOne({ email: newReq.email });
 
     function randomString(length, chars) {
       let mask = "";
@@ -171,14 +172,8 @@ router.post("/login", async (req, res) => {
       });
     });
 
-    res.send(finalResult);
-  } else if (
-    user.email === newReq.email &&
-    user.password === newReq.password &&
-    !user.confirmed
-  ) {
-    res.send({ response: "Utente non registrato" });
-  } else {
+    res.send(finalResult);} else{ { response: "Utente non confermato" }}
+  }else {
     res.send({ response: "Utente non trovato" });
   }
 });
