@@ -175,7 +175,7 @@ router.post("/login", async (req, res) => {
   } else if (
     user.email === newReq.email &&
     user.password === newReq.password &&
-    user.confirmed
+    !user.confirmed
   ) {
     res.send({ response: "Utente non registrato" });
   } else {
