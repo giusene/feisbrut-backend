@@ -530,7 +530,7 @@ router.post("/users", async (req, res) => {
 /* -----------------------------------------------------USER CONFIRMATION---------------------------------------------------------------------- */
 router.post('/confirmation', async (req,res) =>{
   let newReq = req.body
-  let newUser = await usersCollection.findOne({ id: newUserId });
+  let newUser = await usersCollection.findOne({ _id :ObjectId(newReq.id)});
   if(!newUser.confirmed){
     let filter = { _id :ObjectId(newReq.id)}
     let update = {$set : {confirmed:true}}
