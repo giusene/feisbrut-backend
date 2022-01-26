@@ -511,14 +511,15 @@ router.post("/users", async (req, res) => {
       
   );
   if(result.length >0){
-    res.send({response:"indirizzo email già in uso"})
+    res.send({response:"indirizzo email già in uso."})
   } else {
 
     let newObject = { id: newUserId, ...newReq };
     const ris = await usersCollection.insertOne(newObject);
   
     if (ris.acknowledged) {
-      res.status(200).send({response:"indirizzo email già in uso", id:newUserId});
+      let newUser = await usersCollection.findOne({ id: newUserId });
+      res.status(200).send({response:"Controlla la tua mail per confermare il tuo Account.", id:newUser._id});
     }
   }
 });
@@ -573,10 +574,32 @@ router.get("/users/:id", async (req, res) => {
 /* -----------------------------------------------------USER SINGLE PATCH---------------------------------------------------------------------- */
 router.patch("/users/:id", async (req, res) => {
   const userId = req.params["id"];
-  const update = { $set: req.body };
+  newReq = req.body
+
+  let data = [];
+  const cursor = usersCollection.find({});
+  await cursor.forEach((user) => data.push(user));
+  let result = data.filter(
+    (user) =>
+      user._id === newReq._id 
+      
+  );
+
+
+  if(result.length > 0 ){
+    newObject ={
+    name:newReq.name,
+    surname:newReq.surname,
+    email:newReq.email,
+    photo:newReq.photo,
+    bio:newReq.bio
+  }
+  const update = { $set: newObject };
   const filter = { id: userId };
   const ris = await usersCollection.updateOne(filter, update);
   res.send([{ response_: `user id:${userId} updated` }]);
+} else {res.send({response:"accesso non autorizzato"})}
+  
 });
 /* -----------------------------------------------------/USER SINGLE PATCH---------------------------------------------------------------------- */
 
