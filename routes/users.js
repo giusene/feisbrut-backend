@@ -518,7 +518,7 @@ router.post("/users", async (req, res) => {
     const ris = await usersCollection.insertOne(newObject);
   
     if (ris.acknowledged) {
-      res.status(200).send(newUserId);
+      res.status(200).send({response:"indirizzo email già in uso", id:newUserId});
     }
   }
 });
