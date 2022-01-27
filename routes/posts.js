@@ -150,46 +150,47 @@ router.post("/getmypost", async (req, res) => {
     .filter((item) => [...newReq].includes(item.authorId))
     .reverse();
 
-  const cursorUsers = usersCollection.find();
-  await cursorUsers.forEach((user) => {
-    users.push(user);
-  });
-  result.map((post) => {
-    const utenti = users.filter((user) => user.id === post.authorId);
-
-    post = {
-      ...post,
-      authorName: utenti[0].name,
-      authorSurname: utenti[0].surname,
-      authorAlias: utenti[0].bio.alias,
-      authorPhoto: utenti[0].photo,
-      comments: post.comments.map((comment) => {
-        const newUser = users.filter((user) => comment.authorId === user.id);
-        comment = {
-          ...comment,
-          authorName: newUser[0].name,
-          authorSurname: newUser[0].surname,
-          authorPhoto: newUser[0].photo,
-          authorAlias:newUser[0].bio.alias
-           
-        };
-        return comment;
-      }),
-      likes: post.likes.map((like) => {
-        const newUser = users.filter((user) => like === user.id);
-        newLike = {
-          authorId: like,
-          authorName: newUser[0].name,
-          authorSurname: newUser[0].surname,
-          authorPhoto: newUser[0].photo,
-          authorAlias:newUser[0].bio.alias
-        };
-        return newLike;
-      }),
-    };
-    finalResult.push(post);
-  });
-
+    const cursorUsers = usersCollection.find();
+    await cursorUsers.forEach((user) => {
+      users.push(user);
+    });
+    result.map((post) => {
+      const utenti = users.filter((user) => user.id === post.authorId);
+      
+      post = {
+        ...post,
+        authorName: utenti[0].name,
+        authorSurname: utenti[0].surname,
+        authorAlias: utenti[0].bio.alias,
+        authorPhoto: utenti[0].photo,
+        comments: post.comments.map((comment) => {
+          const newUser = users.filter((user) => comment.authorId === user.id);
+          comment = {
+            ...comment,
+            authorName: newUser[0].name,
+            authorSurname: newUser[0].surname,
+            authorPhoto: newUser[0].photo,
+            authorAlias:newUser[0].bio.alias
+            
+          };
+          return comment;
+        }),
+        likes: post.likes.map((like) => {
+          const newUser = users.filter((user) => like === user.id);
+          newLike = {
+            authorId: like,
+            authorName: newUser[0].name,
+            authorSurname: newUser[0].surname,
+            authorPhoto: newUser[0].photo,
+            authorAlias:newUser[0].bio.alias
+          };
+          return newLike;
+        }),
+      };
+      finalResult.push(post);
+    });
+    console.log(finalResult) 
+    
   res.send(finalResult);
 });
   /* -----------------------------------------------------/GET MY POST---------------------------------------------------------------------- */
