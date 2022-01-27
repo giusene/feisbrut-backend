@@ -42,7 +42,7 @@ router.post("/login", async (req, res) => {
     /* console.log(randomString(16, 'aA'));
   console.log(randomString(32, '#aA')); */
 
-    let token = 10 /* randomString(32, "#aA") */;
+    let token = `65fdjs453bdfgs765dhshbf8asee3` /* randomString(32, "#aA") */;
     let timeNow = Date.now();
     const update = {
       $set: {
@@ -207,7 +207,7 @@ router.post("/checksession", async (req, res) => {
     now - lastLogin < 20 &&
     newReq.user_token === user.user_token
   ) {
-    let token = 10 /* randomString(32, "#aA") */;
+    let token = `65fdjs453bdfgs765dhshbf8asee3` /* randomString(32, "#aA") */;
     let timeNow = Date.now();
     const update = {
       $set: { login_time: timeNow, user_token: token, logged: true },
@@ -339,7 +339,7 @@ router.post("/checksession", async (req, res) => {
     !user.checkSession &&
     newReq.logged
   ) {
-    let token = 10/* randomString(32, "#aA") */;
+    let token = `65fdjs453bdfgs765dhshbf8asee3`/* randomString(32, "#aA") */;
     let timeNow = Date.now();
     const update = {
       $set: { login_time: timeNow, user_token: token, logged: true },
