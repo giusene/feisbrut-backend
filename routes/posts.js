@@ -54,7 +54,7 @@ router.post("/posts", async (req, res) => {
 
 
   /* -----------------------------------------------------GET SINGLE POST---------------------------------------------------------------------- */
- router.post("/posts/:id", async (req, res) => {
+ router.get("/posts/:id", async (req, res) => {
    let newReq = req.body
  const postId = req.params["id"];
  let post = await postsCollection.findOne({ id: postId });
