@@ -58,7 +58,7 @@ router.post("/posts", async (req, res) => {
    let newReq = req.body
  const postId = req.params["id"];
  let post = await postsCollection.findOne({ id: postId });
-  if(post.db_id === newReq.db_id){
+  
  let users = [];
  const cursorUsers = usersCollection.find();
   await cursorUsers.forEach((user) => {
@@ -98,7 +98,7 @@ router.post("/posts", async (req, res) => {
  }
  
  res.send(finalPost);
-} else {res.send({response:"non sei autorizzato"})}
+
  });
   /* -----------------------------------------------------/GET SINGLE POST---------------------------------------------------------------------- */
 
