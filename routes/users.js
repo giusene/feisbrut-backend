@@ -314,7 +314,7 @@ router.post("/checksession", async (req, res) => {
     });
 
     userResponse = {
-      id: newUser.id,
+      
       name: newUser.name,
       surname: newUser.surname,
       email: newUser.email,
@@ -445,7 +445,7 @@ router.post("/checksession", async (req, res) => {
     });
 
     userResponse = {
-      id: newUser.id,
+      
       name: newUser.name,
       surname: newUser.surname,
       email: newUser.email,
