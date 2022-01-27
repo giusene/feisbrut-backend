@@ -22,6 +22,15 @@ router.get("/posts", async (req, res) => {
   let data = [];
   const cursor = postsCollection.find({});
   await cursor.forEach((post) => {
+    post = {
+      id:post.id,
+      authorId:post.authorId,
+      text:post.text,
+      date:post.date,
+      likes:post.likes,
+      comments:post.comments,
+      url:post.url
+    }
     data.push(post);
   });
   res.send(data);
@@ -45,10 +54,11 @@ router.post("/posts", async (req, res) => {
 
 
   /* -----------------------------------------------------GET SINGLE POST---------------------------------------------------------------------- */
- router.get("/posts/:id", async (req, res) => {
+ router.post("/posts/:id", async (req, res) => {
+   let newReq = req.body
  const postId = req.params["id"];
  let post = await postsCollection.findOne({ id: postId });
-
+  if(post.db_id === newReq.db_id){
  let users = [];
  const cursorUsers = usersCollection.find();
   await cursorUsers.forEach((user) => {
@@ -57,6 +67,8 @@ router.post("/posts", async (req, res) => {
   const utenti = users.filter((user) => user.id === post.authorId);
  let finalPost ={
    ...post,
+   _id:"*****",
+   db_id:"*****",
    authorName : utenti[0].name,
    authorSurname : utenti[0].surname,
    authorAlias : utenti[0].bio.alias,
@@ -86,18 +98,24 @@ router.post("/posts", async (req, res) => {
  }
  
  res.send(finalPost);
+} else {res.send({response:"non sei autorizzato"})}
  });
   /* -----------------------------------------------------/GET SINGLE POST---------------------------------------------------------------------- */
 
 
   /* -----------------------------------------------------SINGLE POST PATCH---------------------------------------------------------------------- */
 router.patch("/posts/:id", async (req, res) => {
+  let newReq = req.body
   const postId = req.params["id"];
+  let post = await postsCollection.findOne({ id: postId });
+  if(post.db_id === newReq.db_id){
+
   const update = { $set: req.body };
   const filter = { id: postId };
   const ris = await postsCollection.updateOne(filter, update);
 
-  res.send([{response:`post id:${postId} updated`}]);
+  res.send([{response:`post aggiornato con successo`}]);
+  } else {res.send({response:"non sei autorizzato"})}
 });
   /* -----------------------------------------------------/SINGLE POST PATCH---------------------------------------------------------------------- */
 
@@ -105,9 +123,13 @@ router.patch("/posts/:id", async (req, res) => {
 
   /* -----------------------------------------------------SINGLE POST DELETE---------------------------------------------------------------------- */
 router.delete("/posts/:id", async (req, res) => {
+  let newReq = req.body
   const postId = req.params["id"];
+  let post = await postsCollection.findOne({ id: postId });
+  if(post.db_id === newReq.db_id){
   const ris = await postsCollection.deleteOne({ id: postId });
-  res.status(200).send([{response:`post id:${postId} removed`}]);
+  res.status(200).send([{response:`post eliminato con successo`}]);
+  } else {res.send({response:"non sei autorizzato"})}
 });
   /* -----------------------------------------------------/SINGLE POST DELETE---------------------------------------------------------------------- */
 
