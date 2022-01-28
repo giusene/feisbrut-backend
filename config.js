@@ -1,7 +1,10 @@
 
 
 const config = {
-    uriKey:'Me2hMydCDfYD2c7'
+    uriKey:'Giocollov1'
 }
 
 module.exports = config
+
+
+// Me2hMydCDfYD2c7
