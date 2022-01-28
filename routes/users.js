@@ -182,7 +182,8 @@ router.post("/login", async (req, res) => {
 /* -----------------------------------------------------/LOGIN---------------------------------------------------------------------- */
 
 /* -----------------------------------------------------CHECKSESSION---------------------------------------------------------------------- */
-router.post("/checksession", async (req, res) => {
+router.post("/checksession/:id", async (req, res) => {
+  const userId = req.params["id"];
   let data = [];
   const cursor = usersCollection.find({});
   await cursor.forEach((user) => data.push(user));
