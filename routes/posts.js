@@ -161,7 +161,7 @@ router.post("/getmypost", async (req, res) => {
         ...post,
         authorName: utenti[0].name,
         authorSurname: utenti[0].surname,
-        authorAlias: utenti[0].bio.alias,
+        /* authorAlias: utenti[0].bio.alias, */
         authorPhoto: utenti[0].photo,
         comments: post.comments.map((comment) => {
           const newUser = users.filter((user) => comment.authorId === user.id);
@@ -170,7 +170,7 @@ router.post("/getmypost", async (req, res) => {
             authorName: newUser[0].name,
             authorSurname: newUser[0].surname,
             authorPhoto: newUser[0].photo,
-            authorAlias:newUser[0].bio.alias
+            /* authorAlias:newUser[0].bio.alias */
             
           };
           return comment;
@@ -182,7 +182,7 @@ router.post("/getmypost", async (req, res) => {
             authorName: newUser[0].name,
             authorSurname: newUser[0].surname,
             authorPhoto: newUser[0].photo,
-            authorAlias:newUser[0].bio.alias
+            /* authorAlias:newUser[0].bio.alias */
           };
           return newLike;
         }),
