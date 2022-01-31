@@ -198,8 +198,8 @@ router.post("/comments", async (req, res) => {
   action = req.body;
   postId = action.postId;
 
-  let post = await findOne(postsCollection,{ id: postId });
-  let user = await findOne(usersCollection,{ id: post.authorId });
+  let post = await findOneFunction(postsCollection,{ id: postId });
+  let user = await findOneFunction(usersCollection,{ id: post.authorId });
 
   const filter = { id: postId };
   const update = {
