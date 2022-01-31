@@ -1,8 +1,8 @@
 const messageBody = (author_id,text) =>{
     let message = {
-        author: friendDestination,
+        author: author_id,
         date: new Date().toISOString(),
-        text: action.text,
+        text: text,
         read: false,
       }
     return message
