@@ -1,3 +1,5 @@
+
+
 const express = require("express");
 const path = require("path");
 const PORT = process.env.PORT || 5000;
@@ -6,7 +8,8 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const postsRouter = require("./routes/posts");
 const usersRouter = require("./routes/users");
-const homePageRouter = require("./routes/home")
+const homePageRouter = require("./routes/home");
+
 
 express()
   .use(cors())

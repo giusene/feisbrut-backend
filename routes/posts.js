@@ -1,27 +1,26 @@
 const express = require("express");
-const { MongoClient } = require("mongodb");
-const fs = require("fs");
+
+
 const router = express.Router();
 const config = require("../config");
 
-const dbURI = `mongodb+srv://Canstopme0:${config.uriKey}@fesibrut-api.dkfxl.mongodb.net/posts?retryWrites=true&w=majority`;
-const mongoClient = new MongoClient(dbURI);
-const dbURI2 = `mongodb+srv://Canstopme0:${config.uriKey}@fesibrut-api.dkfxl.mongodb.net/users?retryWrites=true&w=majority`;
-const mongoClient2 = new MongoClient(dbURI2);
-
-let feisbrutDB, postsCollection;
-let feisbrutDB2, usersCollection;
+const {findOneFunction,updateOneFunction,findFunction,insertFunction,deleteFunction} = require('../libs/mongoFunctions');
+const {commentsInfo} = require('../libs/commentsInfo');
+const {likesInfo} = require('../libs/likesInfo');
+const {notify} = require('../libs/notifyBody');
 
 
-
+let postsCollection = "posts";
+let usersCollection = "users"
 
 
 
  /* -----------------------------------------------------GLOBAL POST GET---------------------------------------------------------------------- */
 router.get("/posts", async (req, res) => {
-  let data = [];
-  const cursor = postsCollection.find({});
-  await cursor.forEach((post) => {
+  let result = []
+  let posts = await findFunction(postsCollection);
+  posts.forEach((post) => {
+
     post = {
       id:post.id,
       authorId:post.authorId,
@@ -31,9 +30,9 @@ router.get("/posts", async (req, res) => {
       comments:post.comments,
       url:post.url
     }
-    data.push(post);
+    result.push(post);
   });
-  res.send(data);
+  res.send(result);
 });
 
   /* -----------------------------------------------------/GLOBAL POST GET---------------------------------------------------------------------- */
@@ -43,63 +42,43 @@ router.get("/posts", async (req, res) => {
 router.post("/posts", async (req, res) => {
   const newPostId = Date.now().toString();
   newReq = req.body;
-  let newObject = { id: newPostId, ...newReq };
-  const ris = await postsCollection.insertOne(newObject);
 
-  if (ris.acknowledged) {
-    res.status(200).send(newPostId);
-  }
+  let newObject = { id: newPostId, ...newReq };
+  await insertFunction(postsCollection,newObject);
+  
+  res.status(200).send(newPostId);
+  
 });
   /* -----------------------------------------------------/POSTS POST---------------------------------------------------------------------- */
 
 
   /* -----------------------------------------------------GET SINGLE POST---------------------------------------------------------------------- */
- router.get("/posts/:id", async (req, res) => {
-   let newReq = req.body
- const postId = req.params["id"];
- let post = await postsCollection.findOne({ id: postId });
+router.get("/posts/:id", async (req, res) => {  
+  const postId = req.params["id"];
+
+  let post = await findOneFunction(postsCollection,{ id: postId });
   
- let users = [];
- const cursorUsers = usersCollection.find();
-  await cursorUsers.forEach((user) => {
-    users.push(user);
-  });
+  let users = await findFunction(usersCollection);
   const utenti = users.filter((user) => user.id === post.authorId);
- let finalPost ={
-   ...post,
-   _id:"*****",
-   db_id:"*****",
-   authorName : utenti[0].name,
-   authorSurname : utenti[0].surname,
-   authorAlias : utenti[0].bio.alias,
-   authorPhoto : utenti[0].photo,
-   comments: post.comments.map((comment) => {
-    const newUser = users.filter((user) => comment.authorId === user.id);
-    comment = {
-      ...comment,
-      authorName: newUser[0].name,
-      authorSurname: newUser[0].surname,
-      authorPhoto: newUser[0].photo,
-      authorAlias : newUser[0].bio.alias,
-    };
-    return comment;
-  }),
-  likes: post.likes.map((like) => {
-    const newUser = users.filter((user) => like === user.id);
-    newLike = {
-      authorId: like,
-      authorName: newUser[0].name,
-      authorSurname: newUser[0].surname,
-      authorPhoto: newUser[0].photo,
-      authorAlias : newUser[0].bio.alias,
-    };
-    return newLike;
-  }),
- }
+
+  let completeComments = commentsInfo(post);
+  let completeLikes = likesInfo(post);
+
+  let finalPost ={
+    ...post,
+    _id:"*****",
+    db_id:"*****",
+    authorName : utenti[0].name,
+    authorSurname : utenti[0].surname,
+    authorAlias : utenti[0].bio.alias,
+    authorPhoto : utenti[0].photo,
+    comments: completeComments,
+    likes: completeLikes ,
+  }
  
  res.send(finalPost);
 
- });
+});
   /* -----------------------------------------------------/GET SINGLE POST---------------------------------------------------------------------- */
 
 
@@ -107,12 +86,12 @@ router.post("/posts", async (req, res) => {
 router.patch("/posts/:id", async (req, res) => {
   let newReq = req.body
   const postId = req.params["id"];
-  let post = await postsCollection.findOne({ id: postId });
+  let post = await findOneFunction(postsCollection,{ id: postId });
   if(post.db_id === newReq.db_id){
 
   const update = { $set: req.body };
   const filter = { id: postId };
-  const ris = await postsCollection.updateOne(filter, update);
+  await updateOneFunction(postsCollection,filter, update);
 
   res.send([{response:`post aggiornato con successo`}]);
   } else {res.send({response:"non sei autorizzato"})}
@@ -123,12 +102,15 @@ router.patch("/posts/:id", async (req, res) => {
 
   /* -----------------------------------------------------SINGLE POST DELETE---------------------------------------------------------------------- */
 router.delete("/posts/:id", async (req, res) => {
+  const postId = req.params["id"];  
   let newReq = req.body
-  const postId = req.params["id"];
-  let post = await postsCollection.findOne({ id: postId });
+
+  let post = await findOneFunction(postsCollection,{ id: postId });
   if(post.db_id === newReq.db_id){
-  const ris = await postsCollection.deleteOne({ id: postId });
-  res.status(200).send([{response:`post eliminato con successo`}]);
+    await deleteOne(postsCollection,{ id: postId });
+
+    res.status(200).send([{response:`post eliminato con successo`}]);
+
   } else {res.send({response:"non sei autorizzato"})}
 });
   /* -----------------------------------------------------/SINGLE POST DELETE---------------------------------------------------------------------- */
@@ -138,58 +120,30 @@ router.delete("/posts/:id", async (req, res) => {
 router.post("/getmypost", async (req, res) => {
   newReq = req.body;
 
-  let data = [];
-  let users = [];
-  let finalResult = [];
-
-  const cursor = postsCollection.find();
-  await cursor.forEach((post) => {
-    data.push(post);
-  });
-  let result = data
+  let posts = await findFunction(postsCollection);
+  let users = await findFunction(usersCollection);
+  
+  let result = posts
     .filter((item) => [...newReq].includes(item.authorId))
     .reverse();
+  
+    let finalResult = result.map((post) => {
+    const utenti = users.filter((user) => user.id === post.authorId);
+    let completeComments = commentsInfo(post);
+    let completeLikes = likesInfo(post);  
 
-    const cursorUsers = usersCollection.find();
-    await cursorUsers.forEach((user) => {
-      users.push(user);
+    let thisPost = {
+      ...post,
+      authorName: utenti[0].name,
+      authorSurname: utenti[0].surname,      
+      authorPhoto: utenti[0].photo,
+      comments:completeComments,
+      likes: completeLikes,
+    };
+
+    return thisPost
     });
-    result.map((post) => {
-      const utenti = users.filter((user) => user.id === post.authorId);
-      
-      post = {
-        ...post,
-        authorName: utenti[0].name,
-        authorSurname: utenti[0].surname,
-        /* authorAlias: utenti[0].bio.alias, */
-        authorPhoto: utenti[0].photo,
-        comments: post.comments.map((comment) => {
-          const newUser = users.filter((user) => comment.authorId === user.id);
-          comment = {
-            ...comment,
-            authorName: newUser[0].name,
-            authorSurname: newUser[0].surname,
-            authorPhoto: newUser[0].photo,
-            /* authorAlias:newUser[0].bio.alias */
-            
-          };
-          return comment;
-        }),
-        likes: post.likes.map((like) => {
-          const newUser = users.filter((user) => like === user.id);
-          newLike = {
-            authorId: like,
-            authorName: newUser[0].name,
-            authorSurname: newUser[0].surname,
-            authorPhoto: newUser[0].photo,
-            /* authorAlias:newUser[0].bio.alias */
-          };
-          return newLike;
-        }),
-      };
-      finalResult.push(post);
-    });
-    console.log(finalResult) 
+    
     
   res.send(finalResult);
 });
@@ -200,56 +154,40 @@ router.post("/getmypost", async (req, res) => {
   /* -----------------------------------------------------POSTS LIKE---------------------------------------------------------------------- */
 router.post("/like", async (req, res) => {  
   action = req.body;
+  const postId = action.postId;
+  
+  let post = await findOneFunction(postsCollection,{ id: postId });
+  let user = await findOneFunction(usersCollection,{ id: post.authorId });
 
   if (action.type === "like") {
-    const postId = action.postId;
-    let post = await postsCollection.findOne({ id: postId });
-    let user = await usersCollection.findOne({ id: post.authorId });
 
     const updatePost = { $set: { likes: [...post.likes, action.userId] } };
     const filterPost = { id: postId };
     const filterUser = { id: user.id };
-    const updateUser = {
-      $set: {
-        notify: [
-          ...user.notify,
-          {
-            type: "like",
-            who: `${action.userId}`,
-            date: new Date().toISOString(),
-            read: false,
-            postID:postId,
-            notify_id:Date.now().toString()
-          },
-        ],
-      },
-    };
-    const ris = await postsCollection.updateOne(filterPost, updatePost);
+    const updateUser = { $set: { notify: [ ...user.notify , notify( action.userId ,"like", postId ) ]}};
+    await updateOneFunction(postsCollection,filterPost, updatePost);
+
     if(action.userId !== user.id ){
 
-      const ris2 = usersCollection.updateOne(filterUser, updateUser);
+      updateOneFunction(usersCollection,filterUser, updateUser);
   
       res.send([{response:`post id:${postId} updated and notification send`}]);
-    } else {res.send([{response:`post id:${postId} updated and notification unsend`}]);}
+
+    } else {res.send([{response:`post id:${postId} updated and notification unsend`}])}
+
   } else if (action.type === "dislike") {
-    const postId = action.postId;
-    let post = await postsCollection.findOne({ id: postId });
-    let user = await usersCollection.findOne({ id: post.authorId });
+    
+    
     const dislike = post.likes.filter((like) => like !== action.userId);
     const update = { $set: { likes: [...dislike] } };
     const filter = { id: postId };
-    const filterUser = { id: user.id };
-    const updateUser = {
-      $set: { notify: user.notify.filter((not) => not.who !== action.userId) },
-    };
-    const ris = await postsCollection.updateOne(filter, update);
-    /* usersCollection.updateOne(filterUser, updateUser);  */
+    
+    await updateOneFunction(postsCollection,filter, update);
+    
 
     res.send([{response:`post id:${postId} updated`}]);
   }
 });
-
-
 
   /* -----------------------------------------------------/POSTS LIKE---------------------------------------------------------------------- */
 
@@ -259,42 +197,20 @@ router.post("/like", async (req, res) => {
 router.post("/comments", async (req, res) => {
   action = req.body;
   postId = action.postId;
-  let post = await postsCollection.findOne({ id: postId });
-  let user = await usersCollection.findOne({ id: post.authorId });
+
+  let post = await findOne(postsCollection,{ id: postId });
+  let user = await findOne(usersCollection,{ id: post.authorId });
+
   const filter = { id: postId };
   const update = {
-    $set: {
-      comments: [
-        ...post.comments,
-        {
-          authorId: action.authorId,
-          text: action.text,
-          date: action.date
-        },
-      ],
-    },
-  };
+    $set: { comments: [ ...post.comments, { authorId: action.authorId, text: action.text, date: action.date }]}};
   const filterUser = { id: user.id };
-  const updateUser = {
-    $set: {
-      notify: [
-        ...user.notify,
-        {
-          type: "comment",
-          who: `${action.authorId}`,
-          date: new Date().toISOString(),
-          read: false,
-          postID:postId,
-          notify_id:Date.now().toString()
-        },
-      ],
-    },
-  };
+  const updateUser = { $set: { notify: [ ...user.notify, notify( action.authorId, "comment", postId) ]}};
 
-  const ris = await postsCollection.updateOne(filter, update);
+  await updateOneFunction(postsCollection,filter, update);
   if(action.authorId !== user.id  ){
 
-    const ris2 = usersCollection.updateOne(filterUser, updateUser);
+    await updateOneFunction(usersCollection,filterUser, updateUser);
 
     res.send([{response:`post id:${postId} updated and notification send`}]);
   } else {res.send([{response:`post id:${postId} updated and notification unsend `}]);}
@@ -303,27 +219,6 @@ router.post("/comments", async (req, res) => {
 /* -----------------------------------------------------/POSTS COMMENTS---------------------------------------------------------------------- */
 
 
-
-
-
-/* -----------------------------------------------------CONNECTIONS---------------------------------------------------------------------- */
-
-async function run1() {
-  await mongoClient.connect();
-  console.log("siamo connessi con atlas Post!");
-
-  feisbrutDB = mongoClient.db("feisbrut");
-  postsCollection = feisbrutDB.collection("posts");
-}
-async function run2() {
-  await mongoClient2.connect();
-  console.log("siamo connessi con atlas users!");
-
-  feisbrutDB2 = mongoClient2.db("feisbrut");
-  usersCollection = feisbrutDB2.collection("users");
-}
-
-run1().catch((err) => console.log("Errore" + err));
-run2().catch((err) => console.log("Errore" + err));
+/* -----------------------------------------------------------EXPORT---------------------------------------------------------------------- */
 
 module.exports = router;
