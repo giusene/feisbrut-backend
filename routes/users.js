@@ -470,7 +470,7 @@ router.post("/instantmessage", async (req, res) => {
 
   if (me.messages[friend.id]) {    
     
-    let myNewMessageForMe = messageBody(action.my_id,action.text) 
+    let myNewMessageForMe = messageBody(action.my_id,action.text,true) 
 
     const filterMe = { id: action.my_id };
 
@@ -486,7 +486,7 @@ router.post("/instantmessage", async (req, res) => {
     const filterMe = { id: action.my_id };
     updateMe = {
       $set: {
-        messages: { ...me.messages, [friend.id]: [ messageBody(me.id,action.text) ]}
+        messages: { ...me.messages, [friend.id]: [ messageBody(me.id,action.text,true) ]}
       }
     };
     
@@ -496,7 +496,7 @@ router.post("/instantmessage", async (req, res) => {
   
   if (friend.messages[me.id]) {
 
-    let myNewMessage = messageBody(action.my_id,action.text);    
+    let myNewMessage = messageBody(action.my_id,action.text,false);    
     
     let finalMessage = { ...friend.messages, [me.id]:[...friend.messages[me.id], myNewMessage]};
     const filterFriend = { id: action.friend_id };
@@ -509,7 +509,7 @@ router.post("/instantmessage", async (req, res) => {
     const filterFriend = { id: action.friend_id };
     updateFriend = {
       $set: {
-        messages: { ...friend.messages,[me.id]: [ messageBody(me.id,action.text) ]},
+        messages: { ...friend.messages,[me.id]: [ messageBody(me.id,action.text,false) ]},
       }
     };
 

@@ -62,7 +62,7 @@ router.get("/posts/:id", async (req, res) => {
   const utenti = users.filter((user) => user.id === post.authorId);
 
   let completeComments = commentsInfo(post);
-  let completeLikes = likesInfo(post);
+  let completeLikes = likesInfo(post,users);
 
   let finalPost ={
     ...post,
