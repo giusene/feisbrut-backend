@@ -4,9 +4,8 @@ A Brand New Social Network base on React and express.js
 
 ## Try it Now
 
-```sh
 https://giusene.github.io/Feisbrut-React-Social/
-```
+
 
 ## Credits
 
