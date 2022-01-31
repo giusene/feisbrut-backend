@@ -494,11 +494,11 @@ router.post("/instantmessage", async (req, res) => {
     await updateOneFunction(collection, filterMe, updateMe);    
   } 
   
-  if (friend.messages[friendDestination]) {
+  if (friend.messages[me.id]) {
 
     let myNewMessage = messageBody(action.my_id,action.text);    
     
-    let finalMessage = { ...friend.messages, [friendDestination]:[...friend.messages[friendDestination], myNewMessage]};
+    let finalMessage = { ...friend.messages, [me.id]:[...friend.messages[me.id], myNewMessage]};
     const filterFriend = { id: action.friend_id };
     updateFriend = { $set: {messages: finalMessage} };
 
@@ -509,7 +509,7 @@ router.post("/instantmessage", async (req, res) => {
     const filterFriend = { id: action.friend_id };
     updateFriend = {
       $set: {
-        messages: { ...friend.messages,[friendDestination]: [ messageBody(friendDestination,action.text) ]},
+        messages: { ...friend.messages,[me.id]: [ messageBody(me.id,action.text) ]},
       }
     };
 
@@ -529,15 +529,13 @@ router.post("/readmessages", async (req, res) => {
   const me = await findOneFunction(collection,{ id: action.my_id });
   const friend = await findOneFunction(collection,{ id: action.friend_id });
 
-  let myDestination = action.friend_id;
-  let friendDestination = action.my_id;
 
-  if(me.messages[myDestination]){
+  if(me.messages[action.friend_id]){
    
-    let read = me.messages[myDestination].map((element) =>({...element,read:true}));     
+    let read = me.messages[action.friend_id].map((element) =>({...element,read:true}));     
  
     const filterMe = { id: action.my_id };
-    updateMe = { $set: { messages: { ...me.messages, [myDestination]: read }}};    
+    updateMe = { $set: { messages: { ...me.messages, [action.friend_id]: read }}};    
  
     await updateOneFunction(collection,filterMe, updateMe);     
      
