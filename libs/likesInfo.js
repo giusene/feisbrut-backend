@@ -1,6 +1,6 @@
 
 
-const likesInfo = (post) => {
+const likesInfo = (post,users) => {
     let result = post.likes.map((like) => {
         const newUser = users.filter((user) => like === user.id);
         newLike = {

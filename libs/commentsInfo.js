@@ -1,6 +1,6 @@
 
 
-const commentsInfo = (post) => {
+const commentsInfo = (post,users) => {
     let result = post.comments.map((comment) => {
         const newUser = users.filter((user) => comment.authorId === user.id);
         comment = {

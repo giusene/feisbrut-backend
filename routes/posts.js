@@ -122,15 +122,15 @@ router.post("/getmypost", async (req, res) => {
 
   let posts = await findFunction(postsCollection);
   let users = await findFunction(usersCollection);
-  
+  console.log(users)
   let result = posts
     .filter((item) => [...newReq].includes(item.authorId))
     .reverse();
   
-    let finalResult = result.map((post) => {
-    const utenti = users.filter((user) => user.id === post.authorId);
-    let completeComments = commentsInfo(post);
-    let completeLikes = likesInfo(post);  
+    let finalResult =  result.map( (post) => {
+    let utenti =  users.filter((user) => user.id === post.authorId);
+    let completeComments = commentsInfo(post,users);
+    let completeLikes = likesInfo(post,users);  
 
     let thisPost = {
       ...post,
