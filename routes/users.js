@@ -28,50 +28,51 @@ router.post("/login", async (req, res) => {
     if(result[0].confirmed){
       let newUser = await findOneFunction(collection,{ email: newReq.email });   
 
-    let token =  tokenGenerator(32, "#aA");  
+      let token =  tokenGenerator(32, "#aA");  
 
-    const update = {
-      $set: {
-        login_time: Date.now(),
-        user_token: token,
-        checkSession: true,
-        logged: true,
-      },
-    };
-    const filter = { email: newReq.email };
-    await updateOneFunction(collection,filter, update);
-    let finalUser = await findOneFunction(collection,{ email: newReq.email });
-    
-    let completeFriends = await friendsInfo(finalUser.friends,data) ;
-    let completeFriendsReq = await friendsInfo(finalUser.friendreq,data) ;
-    let completeFriendsRec = await friendsInfo(finalUser.friendrec,data) ;
-    let completeNotification = notificationInfo(finalUser,data);
-    let completeMessages = messagesInfo(finalUser,data);
+      const update = {
+        $set: {
+          login_time: Date.now(),
+          user_token: token,
+          checkSession: true,
+          logged: true,
+        },
+      };
+      const filter = { email: newReq.email };
+      await updateOneFunction(collection,filter, update);
+      let finalUser = await findOneFunction(collection,{ email: newReq.email });
+      
+      let completeFriends = await friendsInfo(finalUser.friends,data) ;
+      let completeFriendsReq = await friendsInfo(finalUser.friendreq,data) ;
+      let completeFriendsRec = await friendsInfo(finalUser.friendrec,data) ;
+      let completeNotification = notificationInfo(finalUser,data);
+      let completeMessages = messagesInfo(finalUser,data);
 
 
-    let response = {
-      id: finalUser.id,
-      name: finalUser.name,
-      surname: finalUser.surname,
-      email: finalUser.email,
-      photo: finalUser.photo,
-      friends: completeFriends,
-      bio: finalUser.bio,
-      friendreq: completeFriendsReq,
-      friendrec: completeFriendsRec,
-      messages: completeMessages,
-      confirmed: finalUser.confirmed,
-      notify: completeNotification,
-      login_time: finalUser.login_time,
-      user_token: finalUser.user_token,
-      logged: finalUser.logged,
-      checkSession: finalUser.checkSession,
-      db_id: finalUser._id,
-    }    
+      let response = {
+        id: finalUser.id,
+        name: finalUser.name,
+        surname: finalUser.surname,
+        email: finalUser.email,
+        photo: finalUser.photo,
+        friends: completeFriends,
+        bio: finalUser.bio,
+        friendreq: completeFriendsReq,
+        friendrec: completeFriendsRec,
+        messages: completeMessages,
+        confirmed: finalUser.confirmed,
+        notify: completeNotification,
+        login_time: finalUser.login_time,
+        user_token: finalUser.user_token,
+        logged: finalUser.logged,
+        checkSession: finalUser.checkSession,
+        db_id: finalUser._id,
+      }    
 
-    
+      
 
-    res.send(response);} else{ res.send({ response: "Utente non confermato" })}
+      res.send(response);
+    } else{ res.send({ response: "Utente non confermato" })}
   } else {
     res.send({ response: "Nome Utente o Password Errati" });
   }
@@ -230,7 +231,7 @@ router.patch("/users/:id", async (req, res) => {
     photo:newReq.photo,
     bio:newReq.bio
     }
-    console.log(newObject)
+    
     const update = { $set: newObject };
     const filter = { _id :ObjectId(newReq._id)};
     await updateOneFunction(collection,filter, update);
