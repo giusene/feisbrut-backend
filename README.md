@@ -26,7 +26,7 @@ $ heroku open
 ```
 or
 
-[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+[![Live Demo!](https://giusene.github.io/Feisbrut-React-Social/)]
 
 ## Documentation
 
