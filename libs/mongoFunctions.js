@@ -2,14 +2,9 @@ require('dotenv').config({path: '.env'});
 const { MongoClient, ObjectId, ObjectID } = require("mongodb");
 const uri = process.env.NODE_HEROKU_URI_KEY;
 
-
-
-
-console.log(uri)
-
-const dbURI = `mongodb+srv://Canstopme0:${uri}@fesibrut-api.dkfxl.mongodb.net/posts?retryWrites=true&w=majority`;
+const dbURI = `mongodb+srv://feisbrut:${uri}@fesibrut-api.dkfxl.mongodb.net/posts?retryWrites=true&w=majority`;
 const mongoClient = new MongoClient(dbURI);
-const dbURI2 = `mongodb+srv://Canstopme0:${uri}@fesibrut-api.dkfxl.mongodb.net/users?retryWrites=true&w=majority`;
+const dbURI2 = `mongodb+srv://feisbrut:${uri}@fesibrut-api.dkfxl.mongodb.net/users?retryWrites=true&w=majority`;
 const mongoClient2 = new MongoClient(dbURI2);
 
 let feisbrutDB, postsCollection,usersCollection;
